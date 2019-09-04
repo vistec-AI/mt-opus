@@ -2,7 +2,7 @@
 English-Thai Machine Translation with OPUS data
 
 ## Data
-We used 9 datasets from [OPUS](http://opus.nlpl.eu/index.php) to train and validate our models within and across domains.
+We used 9 datasets from [OPUS](http://opus.nlpl.eu/index.php) to train and validate our models within and across domains (total 5.4M sentence pairs; 68.8M English tokens and 53.1M Thai tokens).
 
 | datasets | nb_sent | en_tok | th_tok | description | reference |
 |------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|--------|--------|------------------------------------|-----------|
