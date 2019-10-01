@@ -1,6 +1,9 @@
 #data
 data/
 
+#sunword-nmt
+subword-nmt/
+
 #led / optimized / DLL files
 __pycache__/
 *.py[cod]
