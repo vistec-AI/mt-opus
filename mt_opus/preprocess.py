@@ -191,3 +191,23 @@ class ThaiSentenceContainsNoThaiCharactersPattern(BaseRule):
             if re.search(r'^โช\sโช', sentence):
                 return True
         return False
+
+class RemoveFullStopInThaiSentence(ReplaceRule):
+
+    def __init__(self):
+        super().__init__()
+    
+    @staticmethod
+    def test(sentence, lang):
+        if lang == 'th':
+            if re.search(r'\.$', sentence):
+                return True
+        return False
+
+    @staticmethod
+    def replace(sentence, lang):
+        sentence = re.sub(r"\.$", '', sentence)
+        return sentence
+    
+
+
