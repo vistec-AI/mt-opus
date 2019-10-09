@@ -211,3 +211,23 @@ class RemoveFullStopInThaiSentence(ReplaceRule):
     
 
 
+
+class ReplaceDashInSentenceRule(ReplaceRule):
+    
+    def __init__(self):
+        super().__init__()
+        
+    @staticmethod
+    def test(sentence, lang):
+        if re.search(r"^\s*\-\s*", sentence):
+            return True
+        if re.search(r"\s*\-\s*$", sentence):
+            return True
+        return False
+
+    @staticmethod
+    def replace(sentence, lang):
+        sentence = re.sub(r"^\s*\-\s*", '', sentence) # "-" found at the start
+        sentence = re.sub(r"\s*\-\s*$", '', sentence) # "-" found at the end
+
+        return sentence
