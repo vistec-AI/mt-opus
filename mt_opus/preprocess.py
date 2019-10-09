@@ -10,6 +10,13 @@ class BaseRule:
     def test(sentence, lang):
         pass
 
+class SentencePairRule:
+
+    @staticmethod    
+    def test(sentence_pair):
+        pass
+
+        
 class ReplaceRule(BaseRule):   
     
     def __init__(self):
@@ -18,6 +25,23 @@ class ReplaceRule(BaseRule):
     @staticmethod 
     def replace(sentence, lang):
         pass
+
+
+class SentencePairFoundRepeatedText(SentencePairRule):
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod    
+    def test(sentence_pair):
+        """
+            sentence_pair Tuple[str, str] -- sentence pair
+        """
+        src, tgt = sentence_pair
+
+        if tgt in src or src in tgt:
+            return True
+        return False
 
 class UnescapeString(ReplaceRule):
     def __init__(self):
@@ -38,7 +62,7 @@ class UnescapeString(ReplaceRule):
         return UnescapeString._unescape_string(sentence)
 
 
-class RemoveHashtagInSentenceRule(ReplaceRule):
+class RemoveHashtagInSentence(ReplaceRule):
     
     def __init__(self):
         super().__init__()
@@ -116,14 +140,11 @@ DEFAULT_UNWANTED_SYMBOLS = [
     b'\xe2\x99\xaa',
 ]
 
-DEFAULT_UNWANTED_PATTERN =  [
-    r'[\{]*[\s]*[\\]*cHFFFFFF[\s]*[\{]*',
-]
 class RemoveUnwantedSymbols(ReplaceRule):
     def __init__(self, symbol_list=DEFAULT_UNWANTED_SYMBOLS):
         """
          symbol_list [str, regex pattern]
-        """
+       ` """
         super().__init__()
         self.symbol_list = symbol_list
 
@@ -136,6 +157,33 @@ class RemoveUnwantedSymbols(ReplaceRule):
     def replace(self, sentence, lang):
         for symbol in self.symbol_list:
             sentence = sentence.encode('utf-8').replace(symbol, b'').decode('utf-8')
+        return sentence
+
+DEFAULT_UNWANTED_PATTERN =  [
+    r"[\{]*[\s]*[\\]*[\s]*cHFFFFFF[\s]*[\}]*",
+    r"\{\}",
+    r"[\\]{1,}[\s]*[N|i1|NI]*",
+    r"[\s]*[#|,]*8203;[\s]*",
+    r"font color[\s]*=[\s]*\"#[\s]*[\d]{3,6}[\s]*\""
+]
+
+class RemoveUnwantedPattern(ReplaceRule):
+    def __init__(self, pattern_list=DEFAULT_UNWANTED_PATTERN):
+        """
+         pattern_list [regex pattern]
+        """
+        super().__init__()
+        self.pattern_list = pattern_list
+
+    def test(self, sentence, lang):
+        for pattern in self.pattern_list:
+            if re.search(pattern, sentence):
+                return True
+        return False
+
+    def replace(self, sentence, lang):
+        for pattern in self.pattern_list:
+            sentence = re.sub(pattern, '', sentence)
         return sentence
 
 class SentenceContainsUnknownSymbol(BaseRule):
@@ -184,13 +232,21 @@ class ThaiSentenceContainsNoThaiCharactersPattern(BaseRule):
     @staticmethod
     def test(sentence, lang):
         if lang == "th":
-            if re.search(r'^โช [A-z]', sentence):
+            if re.search(r'^โช[\s]*[A-z]', sentence):
                 return True
             if re.search(r'^โช\s\.', sentence):
                 return True
             if re.search(r'โช\s*$', sentence):
                 return True
             if re.search(r'^โช\sโช', sentence):
+                return True
+            if re.search(r'โ#[\d]{3,6};', sentence):
+                return True
+            if re.search(r'N#[\d]{3,6};', sentence):
+                return True
+            if re.search(r'#/N#', sentence):
+                return True
+            if re.search(r'ใใใ', sentence):
                 return True
         return False
 
@@ -214,7 +270,7 @@ class RemoveFullStopInThaiSentence(ReplaceRule):
 
 
     
-class ReplaceDashInSentenceRule(ReplaceRule):
+class ReplaceDashInSentence(ReplaceRule):
     
     def __init__(self):
         super().__init__()
