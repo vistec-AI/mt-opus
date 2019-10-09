@@ -199,11 +199,11 @@ def test_SentenceContainsUnknownSymbols_test(string, tested):
     [
         ("โคอิสุรุ", False, False),
         ("โคอิสุรุ", False, False),
+        ("โช I got peace like a river I got peace like a river", True, False),
         ("โช Get th", True, False),
         ("โช I got peace like a river in my soul ", True, False),
         ("โช โช", True, False),
         ("Goto the โช", True, False),
-
     ]
 )
 def test_ThaiSentenceContainsNoThaiCharactersPattern_test(string, tested_th, tested_en):
@@ -445,8 +445,8 @@ def test_RemoveUnwantedPattern_replace(string, replaced):
 @pytest.mark.parametrize(
     "string_tuple, tested",
     [
-        (("สวสาัดี  a hellow word", "a hello world"), True),
-        (("นี่มัน 30;", "39;"), True),
+        (("สวสาัดี  a hello world", "a hello world"), True),
+        (("นี่มัน 30;", "30;"), True),
         (("โทโมะซัง สบายดีไหม" , " Tomosan how are you "), False),
         (("ฉันจบจาก MIT" , " I am graduated from MIT"), False),
 

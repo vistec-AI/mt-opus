@@ -39,9 +39,13 @@ class SentencePairFoundRepeatedText(SentencePairRule):
         """
         src, tgt = sentence_pair
 
-        if tgt in src or src in tgt:
+        if tgt in src:
+            return True
+
+        if src in tgt:
             return True
         return False
+
 
 class UnescapeString(ReplaceRule):
     def __init__(self):
@@ -232,6 +236,8 @@ class ThaiSentenceContainsNoThaiCharactersPattern(BaseRule):
     @staticmethod
     def test(sentence, lang):
         if lang == "th":
+            if b'\xe0\xb9\x82\xc2\x99\xe0\xb8\x8a' in sentence.encode('utf-8'):
+                return True
             if re.search(r'^โช[\s]*[A-z]', sentence):
                 return True
             if re.search(r'^โช\s\.', sentence):
