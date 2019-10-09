@@ -102,7 +102,41 @@ class SentenceLengthLessThanOrEqualToOne(BaseRule):
             return True
         return False
 
+DEFAULT_UNWANTED_SYMBOLS = [
+    b'\xc2\x99',
+    b'\xc2\x84',
+    b'\xe2\x80\x8b',
+    b'\xc2\x94',
+    b'\xc2\x96',
+    b'\xc2\x93',
+    b'\xc2\x85',
+    b'\xc2\x97',
+    b'\xe0\xb9\x82\xc2\x80',
+    b'\xe2\x80\x8b',
+    b'\xe2\x99\xaa',
+]
 
+DEFAULT_UNWANTED_PATTERN =  [
+    r'[\{]*[\s]*[\\]*cHFFFFFF[\s]*[\{]*',
+]
+class RemoveUnwantedSymbols(ReplaceRule):
+    def __init__(self, symbol_list=DEFAULT_UNWANTED_SYMBOLS):
+        """
+         symbol_list [str, regex pattern]
+        """
+        super().__init__()
+        self.symbol_list = symbol_list
+
+    def test(self, sentence, lang):
+        for symbol in self.symbol_list:
+            if symbol in sentence.encode('utf-8'):
+                return True
+        return False
+
+    def replace(self, sentence, lang):
+        for symbol in self.symbol_list:
+            sentence = sentence.encode('utf-8').replace(symbol, b'').decode('utf-8')
+        return sentence
 
 class SentenceContainsUnknownSymbol(BaseRule):
     def __init__(self):
