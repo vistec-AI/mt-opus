@@ -10,7 +10,10 @@ from mt_opus.preprocess import (
     SentenceContainsUnknownSymbol,
     SentenceContainsAdSymbol,
     ThaiSentenceContainsNoThaiCharacters,
-    ThaiSentenceContainsNoThaiCharactersPattern
+    ThaiSentenceContainsNoThaiCharactersPattern,
+    RemoveFullStopInThaiSentence,
+    ReplaceDashInSentenceRule,
+    RemoveUnwantedSymbols,
 )
 
 @pytest.mark.parametrize(
@@ -195,9 +198,8 @@ def test_SentenceContainsUnknownSymbols_test(string, tested):
         ("โคอิสุรุ", False, False),
         ("โคอิสุรุ", False, False),
         ("โช Get th", True, False),
-        ("โคอิสุรุ", True, False),
         ("โช โช", True, False),
-        ("โคอิสุรุ", True, False),
+        ("Goto the โช", True, False),
 
     ]
 )
@@ -208,3 +210,162 @@ def test_ThaiSentenceContainsNoThaiCharactersPattern_test(string, tested_th, tes
 
     output_tested = rule.test(string, lang="en")
     assert tested_en == output_tested
+
+@pytest.mark.parametrize(
+    "string, tested_th, tested_en",
+    [
+        ("โคอิสุรุ", False, False),
+        ("โคอิสุรุ.", True, False),
+        ("สุดท้าย .ฉันยังคงมี", False, False),
+        ("Go to the bracket.", True, False),
+
+    ]
+)
+
+def test_RemoveFullStopInThaiSentence_test(string, tested_th, tested_en):
+    rule = RemoveFullStopInThaiSentence()
+    output_tested = rule.test(string, lang="th")
+    assert tested_th == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested_en == output_tested
+
+
+@pytest.mark.parametrize(
+    "string, replaced_th, replaced_en",
+    [
+        ("โคอิสุรุ", "โคอิสุรุ", "โคอิสุรุ"),
+        ("โคอิสุรุ.", "โคอิสุรุ", "โคอิสุรุ"),
+        ("สุดท้าย .ฉันยังคงมี", "สุดท้าย .ฉันยังคงมี", "สุดท้าย .ฉันยังคงมี"),
+        ("Go to the bracket.", "Go to the bracket", "Go to the bracket"),
+
+    ]
+)
+def test_RemoveFullStopInThaiSentence_replace(string, replaced_th, replaced_en):
+    rule = RemoveFullStopInThaiSentence()
+    output_replaced = rule.replace(string, lang="th")
+    assert replaced_th == output_replaced
+
+    output_replaced = rule.replace(string, lang="en")
+    assert replaced_en == output_replaced
+
+
+
+@pytest.mark.parametrize(
+    "string, tested",
+    [
+        ("- ", True),
+        ("-  ", True),
+        (" - ", True),
+        (" -", True),
+        ("  -", True),
+        ("-โคอิสุ", True),
+        (" -โคอิสุรุ", True),
+        (" - โคอิสุรุ", True),
+        (" - Koisuru-", True),
+        (" - Koisuru - at-", True),
+        ("Koisuru - at", False),
+    ]
+)
+def test_ReplaceDashInSentenceRule_test(string, tested):
+    rule = ReplaceDashInSentenceRule()
+    output_tested = rule.test(string, lang="th")
+    assert tested == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested == output_tested
+
+
+@pytest.mark.parametrize(
+    "string, replaced",
+    [
+        ("- ", ""),
+        ("-  ", ""),
+        (" - ", ""),
+        (" -", ""),
+        ("  -", ""),
+        ("-โคอิสุรุ", "โคอิสุรุ"),
+        (" -โคอิสุรุ", "โคอิสุรุ"),
+        (" - โคอิสุรุ", "โคอิสุรุ"),
+        (" - Koisuru at-", "Koisuru at"),
+        (" - Koisuru - at-", "Koisuru - at"),
+    ]
+)
+def test_ReplaceDashInSentenceRule_replace(string, replaced):
+    rule = ReplaceDashInSentenceRule()
+    output_replaced = rule.replace(string, lang="th")
+    assert replaced == output_replaced
+
+    output_replaced = rule.replace(string, lang="en")
+    assert replaced == output_replaced
+
+@pytest.mark.parametrize(
+    "string, tested",
+    [
+        ("  ", True),
+        ("  ", True),
+        (" ​ ", True),
+        ("  ", True),
+        ("  ", True),
+        ("  ", True),
+        ("  ", True),
+        ("  ", True),
+        (" โ ", True),
+        (" ​ ", True),
+        (" ♪ ", True),
+        # ("{\\ cHFFFFFF", True),
+        # ("{\\cHFFFFFF", True),
+        # ("{\\\\cHFFFFFF", True),
+        # ("{\\ cHFFFFFF}", True),
+        # ("{\\cHFFFFFF}", True),
+        # ("{\\\\cHFFFFFF}", True),
+        # ("{\\ cHFFFFFF }", True),
+        # ("{\\cHFFFFFF }", True),
+        # ("{\\\\cHFFFFFF }", True),
+        # ("cHFFFFFF", True),
+        # ("\\cHFFFFFF", True),
+    ]
+)
+def test_RemoveUnwantedSymbols_test(string, tested):
+    rule = RemoveUnwantedSymbols()
+    output_tested = rule.test(string, lang="th")
+    assert tested == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested == output_tested
+
+
+@pytest.mark.parametrize(
+    "string, replaced",
+    [
+        ("  ", "  "),
+        ("  ", "  "),
+        (" ​ ", "  "),
+        ("  ", "  "),
+        ("  ", "  "),
+        ("  ", "  "),
+        ("  ", "  "),
+        ("  ", "  "),
+        (" โ ", "  "),
+        (" ​ ", "  "),
+        (" ♪ ", "  "),
+        # ("{\\ cHFFFFFF", ""),
+        # ("{\\cHFFFFFF", ""),
+        # ("{\\\\cHFFFFFF", ""),
+        # ("{\\ cHFFFFFF}", ""),
+        # ("{\\cHFFFFFF}", ""),
+        # ("{\\\\cHFFFFFF}", ""),
+        # ("{\\ cHFFFFFF }", ""),
+        # ("{\\cHFFFFFF }", ""),
+        # ("{\\\\cHFFFFFF }", ""),
+        # ("cHFFFFFF", ""),
+        # ("\\cHFFFFFF", ""),
+    ]
+)
+def test_RemoveUnwantedSymbols_replace(string, replaced):
+    rule = RemoveUnwantedSymbols()
+    output_replaced = rule.replace(string, lang="th")
+    assert replaced == output_replaced
+
+    output_replaced = rule.replace(string, lang="en")
+    assert replaced == output_replaced
