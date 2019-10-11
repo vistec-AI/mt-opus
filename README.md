@@ -18,6 +18,13 @@ We used 9 datasets from [OPUS](http://opus.nlpl.eu/index.php) to train and valid
 
 ## Models
 
+## Demo
+
+    1. Download dataset. Run the following script to automatically download the dataset and extract zipped files.
+    
+    ```bash
+        bash download_dataset.sh
+    ```
 ## Results
 
 # References
