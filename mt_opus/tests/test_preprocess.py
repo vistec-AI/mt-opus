@@ -22,17 +22,18 @@ from mt_opus.preprocess import (
     RemoveSemiColonInSentence,
     FormatTime,
     ThaiSentenceContainsUnwantedPattern,
-    SentencePairTokenLengthsDifferGreaterThreashold,
+    SentencePairTokenLengthsDifferGreaterThreshold,
     EnglishSentenceContainsUnwantedPattern,
     SentencePairUSESimilarityLessThanThreashold
 )
 
 @pytest.mark.parametrize(
      "string_pair, tested",
-    [
-        (("เขาจะต้องลำบากแน่ๆ เวลาเดิน",
-          "Not a bit for days."),
-         False),
+    [   
+        # misspelled
+        (("ฉันสงสัยว่าเ? ด็ก ๆ ",
+          "I wonder if the children are..."),
+         True),
         (("ฉันเดิน",
           "I walk"),
          False),
@@ -42,7 +43,7 @@ from mt_opus.preprocess import (
     ]
 )
 def test_SentencePairUSESimilarityLessThanThreashold_test(string_pair, tested):
-    rule = SentencePairUSESimilarityLessThanThreashold(threshold=0.3)
+    rule = SentencePairUSESimilarityLessThanThreashold(threshold=0.4)
     output_tested = rule.test(string_pair)
     assert tested == output_tested
 
@@ -55,7 +56,7 @@ def test_SentencePairUSESimilarityLessThanThreashold_test(string_pair, tested):
     [
         (("เขาจะต้องลำบากแน่ๆ เวลาเดิน",
           "He will have the embarrassment of walking the entire floor."),
-         False),
+          False),
         (("ฉันเดิน",
           "I walk"),
          False),
@@ -67,8 +68,8 @@ def test_SentencePairUSESimilarityLessThanThreashold_test(string_pair, tested):
         )
     ]
 )
-def test_SentencePairTokenLengthsDifferGreaterThreashold_test(string_pair, tested):
-    rule = SentencePairTokenLengthsDifferGreaterThreashold(threshold=0.85)
+def test_SentencePairTokenLengthsDifferGreaterThreshold_test(string_pair, tested):
+    rule = SentencePairTokenLengthsDifferGreaterThreshold(threshold=0.85)
     output_tested = rule.test(string_pair)
     assert tested == output_tested
 

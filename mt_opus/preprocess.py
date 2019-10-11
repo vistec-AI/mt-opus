@@ -118,7 +118,7 @@ class SentencePairUSESimilarityLessThanThreashold(SentencePairRule):
         return False
 
 
-class SentencePairTokenLengthsDifferGreaterThreashold(SentencePairRule):
+class SentencePairTokenLengthsDifferGreaterThreshold(SentencePairRule):
 
     def __init__(self, threshold = 0.85):
         super().__init__()
