@@ -16,7 +16,130 @@ from mt_opus.preprocess import (
     RemoveUnwantedSymbols,
     RemoveUnwantedPattern,
     SentencePairFoundRepeatedText,
+    ReplaceAsteriskInSentence,
+    SentenceContainsOnlyAsterisk,
+    RemoveColonInSentence,
+    RemoveSemiColonInSentence,
+    FormatTime,
+    ThaiSentenceContainsUnwantedPattern
 )
+
+
+@pytest.mark.parametrize(
+     "string, tested",
+    [
+        ("เพลง", True),
+        ("*เพลง*", True),
+        ("*เพลง ไทย", False),
+    ]
+)
+def test_ThaiSentenceContainsUnwantedPattern_test(string, tested):
+    rule = ThaiSentenceContainsUnwantedPattern()
+    output_tested = rule.test(string, lang="th")
+    assert tested == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested == output_tested
+
+
+@pytest.mark.parametrize(
+     "string, tested",
+    [
+        ("Hello world:", True),
+        ("12:29", False),
+    ]
+)
+def test_RemoveColonInSentence_test(string, tested):
+    rule = RemoveColonInSentence()
+    output_tested = rule.test(string, lang="th")
+    assert tested == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested == output_tested
+
+@pytest.mark.parametrize(
+     "string, replaced",
+    [
+        ("Hello world:", "Hello world"),
+        ("12:29", "12:29"),
+    ]
+)
+def test_RemoveColonInSentence_replace(string, replaced):
+    rule = RemoveColonInSentence()
+    output_replaced = rule.replace(string, lang="th")
+    assert replaced == output_replaced
+
+    output_replaced = rule.replace(string, lang="en")
+    assert replaced == output_replaced
+
+
+@pytest.mark.parametrize(
+     "string, tested",
+    [
+        ("Hello world;", True),
+        ("Hello world ;", True),
+        ("12;29", False),
+    ]
+)
+def test_RemoveSemiColonInSentence_test(string, tested):
+    rule = RemoveSemiColonInSentence()
+    output_tested = rule.test(string, lang="th")
+    assert tested == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested == output_tested
+
+@pytest.mark.parametrize(
+     "string, replaced",
+    [
+        ("Hello world;", "Hello world"),
+        ("Hello world ;", "Hello world"),
+        ("12:29", "12:29"),
+    ]
+)
+def test_RemoveSemiColonInSentence_replace(string, replaced):
+    rule = RemoveSemiColonInSentence()
+    output_replaced = rule.replace(string, lang="th")
+    assert replaced == output_replaced
+
+    output_replaced = rule.replace(string, lang="en")
+    assert replaced == output_replaced
+
+
+
+@pytest.mark.parametrize(
+     "string, tested",
+    [
+        ("12:29", False),
+    ]
+)
+def test_FormatTime_test(string, tested):
+    rule = FormatTime()
+    output_tested = rule.test(string, lang="th")
+    assert tested == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested == output_tested
+
+@pytest.mark.parametrize(
+     "string, replaced",
+    [
+        ("12:29", "12:29"),
+        ("12: 29", "12:29"),
+        ("เวลา09: 00", "เวลา09:00"),
+        ("เวลา 09: 00 น.", "เวลา 09:00 น."),
+    ]
+)
+def test_FormatTime_replace(string, replaced):
+    rule = FormatTime()
+    output_replaced = rule.replace(string, lang="th")
+    assert replaced == output_replaced
+
+    output_replaced = rule.replace(string, lang="en")
+    assert replaced == output_replaced
+
+
+
 
 @pytest.mark.parametrize(
      "string, tested",
@@ -150,6 +273,7 @@ def test_NormalizeThaiVowel_replaced(string, replaced_th, replaced_en):
         ("Hello world", False),
         ('ก    ', True),
         ('    ', True),
+        ('', True),
         (' ', True),
         ('_', True),
         ('A', True),
@@ -267,7 +391,26 @@ def test_RemoveFullStopInThaiSentence_replace(string, replaced_th, replaced_en):
         (" - โคอิสุรุ", True),
         (" - Koisuru-", True),
         (" - Koisuru - at-", True),
-        ("Koisuru - at", False),
+        ("Koisuru - at", True),
+        ("แหม-", True),
+        ("ไม่ดีกว่าค่ะ-", True),
+        ("ทำไม--เธอทำอย่างนั้นทำไม?", True),
+        ("ทำไม---เธอทำอย่างนั้นทำไม?", True),
+        ("This building - - I swear to god.", True),
+        ("This building - - - I swear to god.", True),
+        ("Noooo---Let me out...!", True),
+        ("นั่นคือที่เค้าว่ากันนะ ---CSI ปีที่7 ตอนที่21--- ---\"จุดจบของแฮปปี้\"", True),
+        ("I'm Sorry.---Pete", True),
+        ("You, young lady, --- - I'm a mother.", True),
+        ("You want to live with that b---- ?", True),
+        ("Well, w-- uh, I", True),
+        ("Well, w-- uh, I", True),
+        ("Why, it's-- it's Pinoke.", True),
+        ("But I'm going-- - Straight to the top.", True),
+        ("P-I-N- - Eh, uh-- U-O", True),
+        ("What the--?", True),
+        ("อะไรหน่ะ- -?", True),
+        ("You--!", True),
     ]
 )
 def test_ReplaceDashInSentenceRule_test(string, tested):
@@ -291,7 +434,30 @@ def test_ReplaceDashInSentenceRule_test(string, tested):
         (" -โคอิสุรุ", "โคอิสุรุ"),
         (" - โคอิสุรุ", "โคอิสุรุ"),
         (" - Koisuru at-", "Koisuru at"),
-        (" - Koisuru - at-", "Koisuru - at"),
+        (" - Koisuru - at-", "Koisuru at"),
+        ("แหม-", "แหม"),
+        ("ไม่ดีกว่าค่ะ-", "ไม่ดีกว่าค่ะ"),
+        ("ดูรายชื่อโทรออก--- ส่วนใหญ่ถูกลบไปแล้ว มี 2 เบอร์เป็นของทหารในซานดิเอโก้", "ดูรายชื่อโทรออก ส่วนใหญ่ถูกลบไปแล้ว มี 2 เบอร์เป็นของทหารในซานดิเอโก้"),
+        ("Ran the calls-- Mainly take-out, couple to some jarheads in San Diego.", "Ran the calls Mainly take-out, couple to some jarheads in San Diego."),
+        ("ทำไม--เธอทำอย่างนั้นทำไม?", "ทำไม เธอทำอย่างนั้นทำไม?"),
+        ("ทำไม---เธอทำอย่างนั้นทำไม?", "ทำไม เธอทำอย่างนั้นทำไม?"),
+        ("ไม่ใช่ ฉันไม่ต้อง---- ไม่ คือฉัน", "ไม่ใช่ ฉันไม่ต้อง ไม่ คือฉัน"),
+        ("This building - - I swear to god.", "This building I swear to god."),
+        ("This building - - - I swear to god.", "This building I swear to god."),
+        ("Noooo---Let me out...!", "Noooo Let me out...!"),
+        ("นั่นคือที่เค้าว่ากันนะ ---CSI ปีที่7 ตอนที่21--- ---\"จุดจบของแฮปปี้\"", "นั่นคือที่เค้าว่ากันนะ CSI ปีที่7 ตอนที่21 \"จุดจบของแฮปปี้\""),
+        ("I'm Sorry.---Pete", "I'm Sorry. Pete"),
+        ("You, young lady, --- - I'm a mother.", "You, young lady, I'm a mother."),
+        ("it's nooo prob--- tell me!", "it's nooo prob tell me!"),
+        ("You want to live with that b---- ?", "You want to live with that b ?"),
+        ("Well, w-- uh, I", "Well, w uh, I"),
+        ("Why, it's-- it's Pinoke.", "Why, it's it's Pinoke."),
+        ("But I'm going-- - Straight to the top.","But I'm going Straight to the top."),
+        ("P-I-N- - Eh, uh-- U-O", "P-I-N Eh, uh U-O"),
+        ("\"c--deny everything, and d--all 3.\"", "\"c deny everything, and d all 3.\""),
+        ("What the--?", "What the ?"),
+        ("อะไรหน่ะ- -?", "อะไรหน่ะ ?"),
+        ("You--!", "You !")
     ]
 )
 def test_ReplaceDashInSentenceRule_replace(string, replaced):
@@ -447,8 +613,10 @@ def test_RemoveUnwantedPattern_replace(string, replaced):
     [
         (("สวสาัดี  a hello world", "a hello world"), True),
         (("นี่มัน 30;", "30;"), True),
+        (("นี่มัน 30;", ""), True),
         (("โทโมะซัง สบายดีไหม" , " Tomosan how are you "), False),
         (("ฉันจบจาก MIT" , " I am graduated from MIT"), False),
+        (("Ask my sisters - แม่!", "Ask my sisters "), True)
 
     ]
 )
@@ -459,3 +627,70 @@ def test_SentencePairFoundRepeatedText_test(string_tuple, tested):
 
     output_tested = rule.test(string_tuple)
     assert tested == output_tested
+
+
+
+
+@pytest.mark.parametrize(
+    "string, tested",
+    [
+        ("***The joys of surgeondom.", True),
+        ("* she looked at me with big brown eyes * [ knock on door ]", True),
+        ("We got a *bollo* on Little Chino.", True),
+        ("Frank lundy? *******", True),
+        ("* and said, \"you ain\'t seen nothing yet\" *", True),
+        ("* * you want it, you got it, uh * * you want it, baby, you got it * * your best friend harry has a brother larry * * in five days from now, he's gonna marry *", True),
+        ("* Lord *", True)
+    ]
+)
+def test_ReplaceAsteriskInSentencee_test(string, tested):
+    rule = ReplaceAsteriskInSentence()
+    output_tested = rule.test(string, lang="th")
+    assert tested == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested == output_tested
+
+
+@pytest.mark.parametrize(
+    "string, replaced",
+    [
+        ("***The joys of surgeondom.", "The joys of surgeondom."),
+        ("* she looked at me with big brown eyes * [ knock on door ]", "she looked at me with big brown eyes [ knock on door ]"),
+        ("We got a *bollo* on Little Chino.", "We got a bollo on Little Chino."),
+        ("Frank lundy? *******", "Frank lundy?"),
+        ("* and said, \"you ain\'t seen nothing yet\" *", "and said, \"you ain\'t seen nothing yet\""),
+        ("* * you want it, you got it, uh * * you want it, baby, you got it * * your best friend harry has a brother larry * * in five days from now, he's gonna marry *",
+         "you want it, you got it, uh you want it, baby, you got it your best friend harry has a brother larry in five days from now, he's gonna marry"),
+        ("* Lord *", "Lord"),
+        ("* พระองค์ *", "พระองค์"),
+        ("* *deleted*", "deleted"),
+    ]
+)
+def test_ReplaceAsteriskInSentence_replace(string, replaced):
+    rule = ReplaceAsteriskInSentence()
+    output_replaced = rule.replace(string, lang="th")
+    assert replaced == output_replaced
+
+    output_replaced = rule.replace(string, lang="en")
+    assert replaced == output_replaced
+
+
+@pytest.mark.parametrize(
+    "string, tested",
+    [
+        ("***", True),
+        (" *******", True),
+        ("******* ", True),
+        ("  ******* ", True),
+        ("  ******* a cat", False),
+    ]
+)
+def test_SentenceContainsOnlyAsterisk_test(string, tested):
+    rule = SentenceContainsOnlyAsterisk()
+    output_tested = rule.test(string, lang="th")
+    assert tested == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested == output_tested
+

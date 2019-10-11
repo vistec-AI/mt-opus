@@ -1,5 +1,10 @@
 import re
 import html
+
+from collections import Counter
+from functools import partial
+
+from pythainlp.tokenize import word_tokenize
 from pythainlp.util.normalize import normalize as thai_text_normalize
 from pythainlp.util.normalize import _NORMALIZE_RULE2, _NORMALIZE_RULE1
 from pythainlp.util.thai import countthai
@@ -26,6 +31,19 @@ class ReplaceRule(BaseRule):
     def replace(sentence, lang):
         pass
 
+class SentenceContainsOnlyAsterisk(BaseRule):
+
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod    
+    def test(sentence, lang):
+      
+        if re.search(r"^[\s]*\*{1,}[\s]*$", sentence):
+            return True
+    
+        return False
+
 
 class SentencePairFoundRepeatedText(SentencePairRule):
 
@@ -39,13 +57,35 @@ class SentencePairFoundRepeatedText(SentencePairRule):
         """
         src, tgt = sentence_pair
 
-        if tgt in src:
+        if len(tgt) == 0 or len(src) == 0:
             return True
 
-        if src in tgt:
+        if tgt in src or src in tgt:
             return True
         return False
 
+class SentencePairTokenLengthsDifferLessThanThreashold(SentencePairRule):
+
+    def __init__(self, threshold = 0.30):
+        super().__init__()
+        self.threshold = threshold
+        self._tokenize = partial(word_tokenize, engine="newmm", keep_whitespace=False)
+  
+    def test(self, sentence_pair):
+        """
+            sentence_pair Tuple[str, str] -- sentence pair
+        """
+        src, tgt = sentence_pair
+        
+        src_toks, tgt_toks = _tokenize(src), _tokenize(tgt)
+        src_toks_len, tgt_toks_len = len(src_toks), len(tgt_toks)
+        diff = abs(src_toks_len - tgt_toks_len)
+        diff_ratio = 1 - (diff / max(src_toks_len, tgt_toks_len))
+
+        if diff_ratio < self.threashold:
+            return True
+
+        return False
 
 class UnescapeString(ReplaceRule):
     def __init__(self):
@@ -218,6 +258,23 @@ class SentenceContainsAdSymbol(BaseRule):
             return True
         return False
 
+
+DEFAULT_LIST_OF_UNWANTED_PATTERN_THAI = [
+    r'^\*เพลง\*$',
+    r'^เพลง$',
+]
+class ThaiSentenceContainsUnwantedPattern(BaseRule):
+    def __init__(self, list_of_pattern=DEFAULT_LIST_OF_UNWANTED_PATTERN_THAI):
+        super().__init__()
+        self.list_of_pattern = list_of_pattern
+        
+    def test(self, sentence, lang):
+        if lang == "th":
+            for pattern in self.list_of_pattern:
+                if re.compile(pattern).search(sentence):
+                    return True
+        return False
+
 class ThaiSentenceContainsNoThaiCharacters(BaseRule):
     def __init__(self):
         super().__init__()
@@ -274,7 +331,58 @@ class RemoveFullStopInThaiSentence(ReplaceRule):
         return sentence
     
 
+class RemoveColonInSentence(ReplaceRule):
 
+    def __init__(self):
+        super().__init__()
+    
+    @staticmethod
+    def test(sentence, lang):
+        if re.search(r"[\s]*:$", sentence):
+            # Count: 3015 sentence pairs.
+            return True
+        return False
+
+    @staticmethod
+    def replace(sentence, lang):
+        sentence = re.sub(r"[\s]*:$", '', sentence)
+        return sentence
+
+class RemoveSemiColonInSentence(ReplaceRule):
+
+    def __init__(self):
+        super().__init__()
+    
+    @staticmethod
+    def test(sentence, lang):
+        if re.search(r"[\s]*;$", sentence):
+            # Count: 198 sentence pairs.
+            return True
+        return False
+
+    @staticmethod
+    def replace(sentence, lang):
+        sentence = re.sub(r"[\s]*;$", '', sentence)
+        return sentence
+    
+
+class FormatTime(ReplaceRule):
+
+    def __init__(self):
+        super().__init__()
+    
+    @staticmethod
+    def test(sentence, lang):
+        if re.search(r"\d\d:\s\d\d", sentence):
+            # Count: 565 sentence pairs.
+            return True
+        return False
+
+    @staticmethod
+    def replace(sentence, lang):
+        sentence = re.sub(r"(\d\d:)(\s)(\d\d)", lambda m: m.group(1) + m.group(3), sentence)
+        return sentence
+    
     
 class ReplaceDashInSentence(ReplaceRule):
     
@@ -287,11 +395,95 @@ class ReplaceDashInSentence(ReplaceRule):
             return True
         if re.search(r"\s*\-\s*$", sentence):
             return True
+        if re.search(r"([\-]{2,})[\s]+", sentence):
+            return True
+        if re.search(r"([\.\?\!A-z\u0E00-\u0E7F])([\-]{2,})([\.\?\!A-z\u0E00-\u0E7F])", sentence):
+            return True
+        if re.search(r"(\-\s){2,}", sentence):
+            return True
+        if re.search(r"[\s]+([\-]{2,})", sentence):
+            return True
+        if re.search(r"[\s]+\-[\s]+", sentence):
+            return True
+        if re.search(r"[\s]+([\-]{2,})", sentence): 
+            return True
+        if re.search(r"([\-]{2,})[\s]+", sentence): 
+            return True
+        if re.search(r"\-\s\-", sentence):
+            return True
         return False
 
     @staticmethod
     def replace(sentence, lang):
         sentence = re.sub(r"^\s*\-\s*", '', sentence) # "-" found at the start
         sentence = re.sub(r"\s*\-\s*$", '', sentence) # "-" found at the end
+        
+        sentence = re.sub(r"[\s]+([\-]{2,})", ' ', sentence) # " --" -> " "
+        sentence = re.sub(r"([\-]{2,})[\s]+", ' ', sentence) # "-- " -> " "
+        sentence = re.sub(r"[\s]*(\-\s){2,}", ' ', sentence) # " - - - " -> " " or "- - - " -> " "
+
+        sentence = re.sub(r"[\s]+\-[\s]+", ' ', sentence) # " - " -> " "
+        
+        sentence = re.sub(r"\-\s\-", ' ', sentence) # "- -" -> " "
+
+        # substitute "\w\-{2,}\w" to "\w \w" where \w is any character (Thai and English)
+        sentence = re.sub(r"([\.\?\!A-z\u0E00-\u0E7F])([\-]{2,})([\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
 
         return sentence
+
+class ReplaceAsteriskInSentence(ReplaceRule):
+    
+    def __init__(self):
+        super().__init__()
+        
+    @staticmethod
+    def test(sentence, lang):
+        # "*" at the start of sentence
+        if re.search(r"^[\s]*[\*]{1,}[\s]*", sentence):
+            return True
+        # "*" at the end of sentence
+        if re.search(r"[\s]*[\*]{1,}[\s]*$", sentence):
+            return True
+        # " *{1,} " in the sentence
+        if re.search(r"[\s]+[\*]{1,}[\s]+", sentence):
+            return True
+
+        if re.search(r"\s(\*\s){1,}", sentence):
+            return True
+
+        if re.search(r"^[\s]*(\*\s){1,}", sentence):
+            return True
+
+        if re.search(r"\*", sentence):
+            return True
+
+        return False
+
+    @staticmethod
+    def replace(sentence, lang):
+        sentence = re.sub(r"^[\s]*[\*]{1,}[\s]*", '', sentence) # ^"* " -> "" or ^" ****" -> ""
+        sentence = re.sub(r"[\s]*[\*]{1,}[\s]*$", '', sentence) # "* "$ -> "" or " ****"$ -> ""
+
+        sentence = re.sub(r"[\s]+[\*]{1,}[\s]+", ' ', sentence) # " * " -> " "
+
+        sentence = re.sub(r"\s(\*\s){1,}", ' ', sentence) # " * * " -> " "
+        sentence = re.sub(r"^[\s]*(\*\s){1,}", '', sentence) # ^" * *" -> ""
+        
+        sentence = re.sub(r"\*", '', sentence) # "*" -> ""
+
+        return sentence
+
+
+class SentenceContainsTwoDashes(BaseRule):
+     
+    def __init__(self):
+        super().__init__()
+               
+    @staticmethod
+    def test(sentence, lang):
+        # case: 
+        # "\w\-\-\w" to "\w \w" where \w is any character (Thai and English)
+        if re.search(r"([A-z\u0E00-\u0E7F])([\-]{2,})([A-z\u0E00-\u0E7F])", sentence):
+            return True
+
+        return False
