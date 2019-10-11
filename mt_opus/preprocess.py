@@ -4,6 +4,12 @@ import html
 from collections import Counter
 from functools import partial
 
+import numpy as np
+import tensorflow as tf
+import tensorflow_hub as hub
+import sentencepiece as spm
+import tf_sentencepiece 
+
 from pythainlp.tokenize import word_tokenize
 from pythainlp.util.normalize import normalize as thai_text_normalize
 from pythainlp.util.normalize import _NORMALIZE_RULE2, _NORMALIZE_RULE1
@@ -64,9 +70,57 @@ class SentencePairFoundRepeatedText(SentencePairRule):
             return True
         return False
 
-class SentencePairTokenLengthsDifferLessThanThreashold(SentencePairRule):
+###
 
-    def __init__(self, threshold = 0.30):
+
+
+class SentencePairUSESimilarityLessThanThreashold(SentencePairRule):
+
+
+
+    def __init__(self, threshold = 0.85):
+        super().__init__()
+        self.threshold = threshold
+
+        self._graph = tf.Graph()
+        with self._graph.as_default():
+            self.text_input = tf.placeholder(dtype=tf.string, shape=[None])
+            embed = hub.Module("https://tfhub.dev/google/universal-sentence-encoder-multilingual/1")
+            self.embedded_text = embed(self.text_input)
+            self._init_op = tf.group([tf.global_variables_initializer(), tf.tables_initializer()])
+        self._graph.finalize()
+
+    
+    def _compute_similarity(self, src_sent, tgt_sent):
+        """
+            Calculate sentence similarity based on Google Universal Sentence Encoder (Multilingual Large)
+        """
+        session = tf.Session(graph=self._graph)
+        session.run(self._init_op)
+        
+        src_result = session.run(self.embedded_text, feed_dict={self.text_input: [src_sent]})
+        tgt_result = session.run(self.embedded_text, feed_dict={self.text_input: [tgt_sent]})
+        
+        return np.inner(src_result, tgt_result).reshape(1)[0]
+
+
+    def test(self, sentence_pair):
+        """
+            sentence_pair Tuple[str, str] -- sentence pair
+        """
+        src, tgt = sentence_pair
+        
+        similarity = self._compute_similarity(src, tgt)
+
+        if similarity < self.threshold:
+            return True
+
+        return False
+
+
+class SentencePairTokenLengthsDifferGreaterThreashold(SentencePairRule):
+
+    def __init__(self, threshold = 0.85):
         super().__init__()
         self.threshold = threshold
         self._tokenize = partial(word_tokenize, engine="newmm", keep_whitespace=False)
@@ -77,12 +131,12 @@ class SentencePairTokenLengthsDifferLessThanThreashold(SentencePairRule):
         """
         src, tgt = sentence_pair
         
-        src_toks, tgt_toks = _tokenize(src), _tokenize(tgt)
+        src_toks, tgt_toks = self._tokenize(src), self._tokenize(tgt)
         src_toks_len, tgt_toks_len = len(src_toks), len(tgt_toks)
         diff = abs(src_toks_len - tgt_toks_len)
-        diff_ratio = 1 - (diff / max(src_toks_len, tgt_toks_len))
+        diff_ratio =  diff / (max(src_toks_len, tgt_toks_len))
 
-        if diff_ratio < self.threashold:
+        if diff_ratio > self.threshold:
             return True
 
         return False
@@ -101,8 +155,8 @@ class UnescapeString(ReplaceRule):
 
     @staticmethod
     def replace(sentence, lang):
-        sentence = sentence.replace('\\"', '"')
-        sentence = sentence.replace("\\'", "'")
+        sentence = re.sub(r'[\\]+"', '"', sentence)
+        sentence = re.sub(r"[\\]+'", "'", sentence)
         return UnescapeString._unescape_string(sentence)
 
 
@@ -262,6 +316,7 @@ class SentenceContainsAdSymbol(BaseRule):
 DEFAULT_LIST_OF_UNWANTED_PATTERN_THAI = [
     r'^\*เพลง\*$',
     r'^เพลง$',
+    r'^[คำ]*บรรยาย[\s]*((ตาม)|(โดย))',
 ]
 class ThaiSentenceContainsUnwantedPattern(BaseRule):
     def __init__(self, list_of_pattern=DEFAULT_LIST_OF_UNWANTED_PATTERN_THAI):
@@ -270,6 +325,21 @@ class ThaiSentenceContainsUnwantedPattern(BaseRule):
         
     def test(self, sentence, lang):
         if lang == "th":
+            for pattern in self.list_of_pattern:
+                if re.compile(pattern).search(sentence):
+                    return True
+        return False
+
+DEFAULT_LIST_OF_UNWANTED_PATTERN_ENGLISH = [
+    r'(?i)(^subtitle[s]*)|(subtitle[s]*$)|(subtitles ((by)|(conformed by)|(downloaded from)))',
+]
+class EnglishSentenceContainsUnwantedPattern(BaseRule):
+    def __init__(self, list_of_pattern=DEFAULT_LIST_OF_UNWANTED_PATTERN_ENGLISH):
+        super().__init__()
+        self.list_of_pattern = list_of_pattern
+        
+    def test(self, sentence, lang):
+        if lang == "en":
             for pattern in self.list_of_pattern:
                 if re.compile(pattern).search(sentence):
                     return True
@@ -415,8 +485,8 @@ class ReplaceDashInSentence(ReplaceRule):
 
     @staticmethod
     def replace(sentence, lang):
-        sentence = re.sub(r"^\s*\-\s*", '', sentence) # "-" found at the start
-        sentence = re.sub(r"\s*\-\s*$", '', sentence) # "-" found at the end
+        sentence = re.sub(r"^\s*[\-]{1,}\s*", '', sentence) # "-" found at the start
+        sentence = re.sub(r"\s*[\-]{1,}\s*$", '', sentence) # "-" found at the end
         
         sentence = re.sub(r"[\s]+([\-]{2,})", ' ', sentence) # " --" -> " "
         sentence = re.sub(r"([\-]{2,})[\s]+", ' ', sentence) # "-- " -> " "
@@ -427,7 +497,7 @@ class ReplaceDashInSentence(ReplaceRule):
         sentence = re.sub(r"\-\s\-", ' ', sentence) # "- -" -> " "
 
         # substitute "\w\-{2,}\w" to "\w \w" where \w is any character (Thai and English)
-        sentence = re.sub(r"([\.\?\!A-z\u0E00-\u0E7F])([\-]{2,})([\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
+        sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])([\-]{2,})([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
 
         return sentence
 

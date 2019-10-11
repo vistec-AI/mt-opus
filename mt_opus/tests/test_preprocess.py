@@ -21,25 +21,95 @@ from mt_opus.preprocess import (
     RemoveColonInSentence,
     RemoveSemiColonInSentence,
     FormatTime,
-    ThaiSentenceContainsUnwantedPattern
+    ThaiSentenceContainsUnwantedPattern,
+    SentencePairTokenLengthsDifferGreaterThreashold,
+    EnglishSentenceContainsUnwantedPattern,
+    SentencePairUSESimilarityLessThanThreashold
 )
+
+@pytest.mark.parametrize(
+     "string_pair, tested",
+    [
+        (("เขาจะต้องลำบากแน่ๆ เวลาเดิน",
+          "Not a bit for days."),
+         False),
+        (("ฉันเดิน",
+          "I walk"),
+         False),
+        (("ฉันซื้อแมว", "I bought a cat."),
+         False
+        )
+    ]
+)
+def test_SentencePairUSESimilarityLessThanThreashold_test(string_pair, tested):
+    rule = SentencePairUSESimilarityLessThanThreashold(threshold=0.3)
+    output_tested = rule.test(string_pair)
+    assert tested == output_tested
+
+    output_tested = rule.test(string_pair)
+    assert tested == output_tested
 
 
 @pytest.mark.parametrize(
-     "string, tested",
+     "string_pair, tested",
     [
-        ("เพลง", True),
-        ("*เพลง*", True),
-        ("*เพลง ไทย", False),
+        (("เขาจะต้องลำบากแน่ๆ เวลาเดิน",
+          "He will have the embarrassment of walking the entire floor."),
+         False),
+        (("ฉันเดิน",
+          "I walk"),
+         False),
+        (("ไม่กัดวัน", "Not a bit for days."),
+         False
+        ),
+         (("ไม่", "No. Not a bit for days.,"),
+         True
+        )
     ]
 )
-def test_ThaiSentenceContainsUnwantedPattern_test(string, tested):
-    rule = ThaiSentenceContainsUnwantedPattern()
-    output_tested = rule.test(string, lang="th")
+def test_SentencePairTokenLengthsDifferGreaterThreashold_test(string_pair, tested):
+    rule = SentencePairTokenLengthsDifferGreaterThreashold(threshold=0.85)
+    output_tested = rule.test(string_pair)
     assert tested == output_tested
 
-    output_tested = rule.test(string, lang="en")
+    output_tested = rule.test(string_pair)
     assert tested == output_tested
+
+
+@pytest.mark.parametrize(
+     "string, tested_th, tested_en",
+    [
+        ("เพลง", True, False),
+        ("*เพลง*", True, False),
+        ("*เพลง ไทย", False, False),
+        ("คำบรรยายโดย", True, False),
+    ]
+)
+def test_ThaiSentenceContainsUnwantedPattern_test(string, tested_th, tested_en):
+    rule = ThaiSentenceContainsUnwantedPattern()
+    output_tested = rule.test(string, lang="th")
+    assert tested_th == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested_en == output_tested
+
+@pytest.mark.parametrize(
+     "string, tested_th, tested_en",
+    [
+        ("Subtitles conformed by SOFTITLER", False, True),
+        ("Yemanja be praised. Visiontext Subtitles", False, True),
+        ("Subtitle By Trasporter", False, True),
+        ("Visiontext subtitles by Susan Voas", False, True)
+    ]
+)
+def test_EnglishSentenceContainsUnwantedPattern_test(string, tested_th, tested_en):
+    rule = EnglishSentenceContainsUnwantedPattern()
+    output_tested = rule.test(string, lang="th")
+    assert tested_th == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested_en == output_tested
+
 
 
 @pytest.mark.parametrize(
@@ -166,6 +236,7 @@ def test_UnescapeString_test(string, tested):
         ('สวัสดี \\" ซาวาน', 'สวัสดี " ซาวาน'),
         ("สวัสดี \\' ซาวาน", "สวัสดี ' ซาวาน"),
         ("สวัสดี \\'\\' ซาวาน", "สวัสดี '' ซาวาน"),
+        ("สวัสดี \\\\'\\\\' ซาวาน", "สวัสดี '' ซาวาน"),
         ("สวัสดี ซาวาน &amp; นกกา", "สวัสดี ซาวาน & นกกา"),
     ]
 )
@@ -457,7 +528,12 @@ def test_ReplaceDashInSentenceRule_test(string, tested):
         ("\"c--deny everything, and d--all 3.\"", "\"c deny everything, and d all 3.\""),
         ("What the--?", "What the ?"),
         ("อะไรหน่ะ- -?", "อะไรหน่ะ ?"),
-        ("You--!", "You !")
+        ("You--!", "You !"),
+        ("อะ--", "อะ"),
+        ("Bones ปีที่ 7 ตอนที่ 8--The Bump in the Road ออกอากาศวันที่ 9 เมษายน 2555",
+         "Bones ปีที่ 7 ตอนที่ 8 The Bump in the Road ออกอากาศวันที่ 9 เมษายน 2555"),
+        ("น้องเมียอาจมีส่วนเกี่ยวข้องกับ การตายของน้องชายตัวเอง เราพบเงินสดในล็อคเกอร์ของคุึณ ที่ควีนส์---",
+         "น้องเมียอาจมีส่วนเกี่ยวข้องกับ การตายของน้องชายตัวเอง เราพบเงินสดในล็อคเกอร์ของคุึณ ที่ควีนส์")
     ]
 )
 def test_ReplaceDashInSentenceRule_replace(string, replaced):
