@@ -42,6 +42,7 @@ from mt_opus.preprocess import (
         )
     ]
 )
+@pytest.mark.skip(reason="not work currently on mac osx")
 def test_SentencePairUSESimilarityLessThanThreashold_test(string_pair, tested):
     rule = SentencePairUSESimilarityLessThanThreashold(threshold=0.4)
     output_tested = rule.test(string_pair)
@@ -534,7 +535,13 @@ def test_ReplaceDashInSentenceRule_test(string, tested):
         ("Bones ปีที่ 7 ตอนที่ 8--The Bump in the Road ออกอากาศวันที่ 9 เมษายน 2555",
          "Bones ปีที่ 7 ตอนที่ 8 The Bump in the Road ออกอากาศวันที่ 9 เมษายน 2555"),
         ("น้องเมียอาจมีส่วนเกี่ยวข้องกับ การตายของน้องชายตัวเอง เราพบเงินสดในล็อคเกอร์ของคุึณ ที่ควีนส์---",
-         "น้องเมียอาจมีส่วนเกี่ยวข้องกับ การตายของน้องชายตัวเอง เราพบเงินสดในล็อคเกอร์ของคุึณ ที่ควีนส์")
+         "น้องเมียอาจมีส่วนเกี่ยวข้องกับ การตายของน้องชายตัวเอง เราพบเงินสดในล็อคเกอร์ของคุึณ ที่ควีนส์"),
+        ("และจากที่ฉันได้ยินในอุโมงค์--/เธอบอกว่าเธอไม่ได้เห็นอะไรหนิ", "และจากที่ฉันได้ยินในอุโมงค์ เธอบอกว่าเธอไม่ได้เห็นอะไรหนิ"),
+        ("And from what I heard in that tunnel -You said you didn't see anything.", "And from what I heard in that tunnel You said you didn't see anything."),
+        ("เบื้องต้นนะ--22 คดี", "เบื้องต้นนะ 22 คดี"),
+        ("1--ยกเลิกโทษประหาร", "1 ยกเลิกโทษประหาร"),
+        
+
     ]
 )
 def test_ReplaceDashInSentenceRule_replace(string, replaced):
