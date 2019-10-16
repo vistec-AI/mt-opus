@@ -1,6 +1,9 @@
 #data
 data/
 
+#.vscode
+.vscode/*
+
 #logs
 notebooks/logs/*
 
