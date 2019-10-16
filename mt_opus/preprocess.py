@@ -497,7 +497,8 @@ class ReplaceDashInSentence(ReplaceRule):
         sentence = re.sub(r"\-\s\-", ' ', sentence) # "- -" -> " "
 
         # substitute "\w\-{2,}\w" to "\w \w" where \w is any character (Thai and English)
-        sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])([\-]{2,})([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
+        sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])([\-/]{2,})([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
+        sentence = re.sub(r"([\s]+)([\-]{1,})([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: ' ' + m.group(3), sentence)
 
         return sentence
 
