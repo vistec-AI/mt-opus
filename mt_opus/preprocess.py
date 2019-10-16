@@ -460,6 +460,8 @@ class ReplaceSlashInSentence(ReplaceRule):
         
     @staticmethod
     def test(sentence, lang):
+        if re.search(r"o/\~", sentence):
+            return True
         if re.search(r"/[Nn]", sentence):
             return True
         if re.search(r"/", sentence):
@@ -469,11 +471,25 @@ class ReplaceSlashInSentence(ReplaceRule):
     
     @staticmethod
     def replace(sentence, lang):
-        sentence = re.sub(r"^[\s\.]*/[\s]*", '', sentence) 
-        sentence = re.sub(r"[\s]+/[\s]+", ' ', sentence) 
-
-        sentence = re.sub(r"\s/[Nn]\s", ' ', sentence) 
+        sentence = re.sub(r"^[\s]*/[Nn][\s]*", '', sentence) 
+        sentence = re.sub(r"[\s]*/[Nn][\s]*$", '', sentence) 
         sentence = re.sub(r"/[Nn]\s", ' ', sentence) 
+        sentence = re.sub(r"\s/[Nn]\s", ' ', sentence) 
+
+        sentence = re.sub(r"^[\s]*o/\~[\s]*", '', sentence) 
+        sentence = re.sub(r"[\s]*o/\~[\s]*$", '', sentence) 
+        
+        sentence = re.sub(r"(o/\~\s){1,}", '', sentence) 
+        sentence = re.sub(r"o/\~[\s]*", ' ', sentence) 
+        sentence = re.sub(r"[\s]*o/\~", ' ', sentence) 
+
+        sentence = re.sub(r"^[\s\.]*/[\s]*", '', sentence) 
+        sentence = re.sub(r"[\s\.]*/[\s]*$", '', sentence) 
+
+        sentence = re.sub(r"[\s]+(/)+[\s]+", ' ', sentence) 
+        sentence = re.sub(r"(/){1,}[\s]+", ' ', sentence) 
+        sentence = re.sub(r"[\s]+(/){1,}", ' ', sentence) 
+
 
         sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])(/[Nn])([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
         sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])(/)([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
@@ -508,6 +524,12 @@ class ReplaceDashInSentence(ReplaceRule):
             return True
         if re.search(r"\-\s\-", sentence):
             return True
+        if re.search(r"([\u0E00-\u0E7F])(\-\s)([\u0E00-\u0E7F])", sentence):
+            return True
+        if re.search(r"[\-]{2,}", sentence):
+            return True
+        if re.search(r"[\s]*\-[\s]*", sentence):
+            return True
         return False
 
     @staticmethod
@@ -526,6 +548,8 @@ class ReplaceDashInSentence(ReplaceRule):
         # substitute "\w\-{2,}\w" to "\w \w" where \w is any character (Thai and English)
         sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])([\-/]{2,})([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
         sentence = re.sub(r"([\s]+)([\-]{1,})([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: ' ' + m.group(3), sentence)
+        # substitute "\w \w" to "\w \w" where \w is any character (Thai)
+        sentence = re.sub(r"([\u0E00-\u0E7F])(\-\s)([\u0E00-\u0E7F])", lambda m:  m.group(1) + '' + m.group(3), sentence)
 
         return sentence
 

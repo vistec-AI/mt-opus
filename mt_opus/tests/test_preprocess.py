@@ -485,6 +485,13 @@ def test_RemoveFullStopInThaiSentence_replace(string, replaced_th, replaced_en):
         ("What the--?", True),
         ("อะไรหน่ะ- -?", True),
         ("You--!", True),
+        ("อะ--", True),
+        ("Bones ปีที่ 7 ตอนที่ 8--The Bump in the Road ออกอากาศวันที่ 9 เมษายน 2555", True),
+        ("น้องเมียอาจมีส่วนเกี่ยวข้องกับ การตายของน้องชายตัวเอง เราพบเงินสดในล็อคเกอร์ของคุึณ ที่ควีนส์---", True),
+        ("และจากที่ฉันได้ยินในอุโมงค์--/เธอบอกว่าเธอไม่ได้เห็นอะไรหนิ", True),
+        ("And from what I heard in that tunnel -You said you didn't see anything.", True),
+        ("เบื้องต้นนะ--22 คดี", True),
+        ("1--ยกเลิกโทษประหาร", True),
     ]
 )
 def test_ReplaceDashInSentenceRule_test(string, tested):
@@ -695,6 +702,15 @@ def test_RemoveUnwantedPattern_replace(string, replaced):
 @pytest.mark.parametrize(
     "string, replaced",
     [
+        ('o/~ การหลอกลวงที่ไหนกัน o/~', 'การหลอกลวงที่ไหนกัน'),
+        ('ชั้นรู้ว่าคุณรู้ o/~ ฉันไม่ได้บอกความจริง o/~ o/~ ฉันรู้ว่าคุณรู้ o/~', 'ชั้นรู้ว่าคุณรู้ ฉันไม่ได้บอกความจริง ฉันรู้ว่าคุณรู้'),
+        ('เพื่ออะไร /N', 'เพื่ออะไร'),
+        ('พอร์ทแมนไง /', 'พอร์ทแมนไง'),
+        ('ถ้าเธอช่วยได้แค่นี้// ก็ไปไกลๆเลย', 'ถ้าเธอช่วยได้แค่นี้ ก็ไปไกลๆเลย'),
+        ('อินนิโก // อะไรเหรอ?', 'อินนิโก อะไรเหรอ?'),
+        ('บรรยาย// ไทเลอร์ขายสบู่ให้กับห้าง', 'บรรยาย ไทเลอร์ขายสบู่ให้กับห้าง'),
+        ('เยี่ยมจริงๆ ตาเฒ่าสวีนีย์ /เขาไม่เคยหยุดความพยายาม', 'เยี่ยมจริงๆ ตาเฒ่าสวีนีย์ เขาไม่เคยหยุดความพยายาม'),
+        ('นายมาถึงเมื่อไหร่/ เมื่อกี้เอง', 'นายมาถึงเมื่อไหร่ เมื่อกี้เอง'),
         ('/ ได้สิ', 'ได้สิ'),
         ('. / ซู-จุง', 'ซู-จุง'),
         ('ขอให้มีความสุข/บาย/แล้วเจอกัน', 'ขอให้มีความสุข บาย แล้วเจอกัน'),
@@ -710,6 +726,32 @@ def test_ReplaceSlashInSentence_replace(string, replaced):
     output_replaced = rule.replace(string, lang="en")
     assert replaced == output_replaced
 
+@pytest.mark.parametrize(
+    "string, tested",
+    [
+        ('o/~ การหลอกลวงที่ไหนกัน o/~', True),
+        ('ชั้นรู้ว่าคุณรู้ o/~ ฉันไม่ได้บอกความจริง o/~ o/~ ฉันรู้ว่าคุณรู้ o/~', True),
+        ('เพื่ออะไร /N', True),
+        ('พอร์ทแมนไง /', True),
+        ('ถ้าเธอช่วยได้แค่นี้// ก็ไปไกลๆเลย', True),
+        ('อินนิโก // อะไรเหรอ?', True),
+        ('บรรยาย// ไทเลอร์ขายสบู่ให้กับห้าง', True),
+        ('เยี่ยมจริงๆ ตาเฒ่าสวีนีย์ /เขาไม่เคยหยุดความพยายาม', True),
+        ('นายมาถึงเมื่อไหร่/ เมื่อกี้เอง', True),
+        ('/ ได้สิ', True),
+        ('. / ซู-จุง', True),
+        ('ขอให้มีความสุข/บาย/แล้วเจอกัน', True),
+        ('แล้วผลักเธอ/เข้าไปในรถ แต่ว่าคุณ/N ทำอย่างนั้นคนเดียวได้เหรอ', True),
+        ('และ ที่จริงมันคืออะไร / อุบายของเธอ ออกัสตุสเหรอ?', True),
+    ]
+)
+def test_ReplaceSlashInSentence_test(string, tested):
+    rule = ReplaceSlashInSentence()
+    output_tested = rule.test(string, lang="th")
+    assert tested == output_tested
+
+    output_tested = rule.test(string, lang="en")
+    assert tested == output_tested
 
 @pytest.mark.parametrize(
     "string_tuple, tested",
