@@ -491,9 +491,9 @@ class ReplaceSlashInSentence(ReplaceRule):
         sentence = re.sub(r"[\s]+(/){1,}", ' ', sentence) 
 
 
-        sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])(/[Nn])([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
-        sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])(/)([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
-        # sentence = re.sub(r"/\s", '', sentence) 
+        sentence = re.sub(r"([0-9\.,\"\?\!A-z\u0E00-\u0E7F])(/[Nn])([0-9\.,\"\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
+        sentence = re.sub(r"([0-9\.,\"\?\!A-z\u0E00-\u0E7F])(/){1,}([0-9\.,\"\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
+
 
         return sentence
 
