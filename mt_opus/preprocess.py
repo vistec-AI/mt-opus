@@ -262,7 +262,8 @@ DEFAULT_UNWANTED_PATTERN =  [
     r"\{\}",
     r"[\\]{1,}[\s]*[N|i1|NI]*",
     r"[\s]*[#|,]*8203;[\s]*",
-    r"font color[\s]*=[\s]*\"#[\s]*[\d]{3,6}[\s]*\""
+    r"font color[\s]*=[\s]*\"#[\s]*[\d]{3,6}[\s]*\"",
+    r"/*c\.bg_transparent[\s]*",
 ]
 
 class RemoveUnwantedPattern(ReplaceRule):
@@ -453,7 +454,33 @@ class FormatTime(ReplaceRule):
         sentence = re.sub(r"(\d\d:)(\s)(\d\d)", lambda m: m.group(1) + m.group(3), sentence)
         return sentence
     
+class ReplaceSlashInSentence(ReplaceRule):
+    def __init__(self):
+        super().__init__()
+        
+    @staticmethod
+    def test(sentence, lang):
+        if re.search(r"/[Nn]", sentence):
+            return True
+        if re.search(r"/", sentence):
+            return True
+      
+        return False
     
+    @staticmethod
+    def replace(sentence, lang):
+        sentence = re.sub(r"^[\s\.]*/[\s]*", '', sentence) 
+        sentence = re.sub(r"[\s]+/[\s]+", ' ', sentence) 
+
+        sentence = re.sub(r"\s/[Nn]\s", ' ', sentence) 
+        sentence = re.sub(r"/[Nn]\s", ' ', sentence) 
+
+        sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])(/[Nn])([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
+        sentence = re.sub(r"([0-9\.\?\!A-z\u0E00-\u0E7F])(/)([0-9\.\?\!A-z\u0E00-\u0E7F])", lambda m: m.group(1) + ' ' + m.group(3), sentence)
+        # sentence = re.sub(r"/\s", '', sentence) 
+
+        return sentence
+
 class ReplaceDashInSentence(ReplaceRule):
     
     def __init__(self):

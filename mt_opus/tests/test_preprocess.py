@@ -24,7 +24,8 @@ from mt_opus.preprocess import (
     ThaiSentenceContainsUnwantedPattern,
     SentencePairTokenLengthsDifferGreaterThreshold,
     EnglishSentenceContainsUnwantedPattern,
-    SentencePairUSESimilarityLessThanThreashold
+    SentencePairUSESimilarityLessThanThreashold,
+    ReplaceSlashInSentence
 )
 
 @pytest.mark.parametrize(
@@ -679,12 +680,30 @@ def test_RemoveUnwantedPattern_test(string, tested):
         ('font color="# 808080 "', ""),
         ('font color="#808080"', ""),
         ('font color= "#808080"', ""),
-
-
+        (' แคลร์/c.bg_transparent ', " แคลร์"),
+        ('c.bg_transparentผมรักคุณ/c.bg_transparent', 'ผมรักคุณ'),
     ]
 )
 def test_RemoveUnwantedPattern_replace(string, replaced):
     rule = RemoveUnwantedPattern()
+    output_replaced = rule.replace(string, lang="th")
+    assert replaced == output_replaced
+
+    output_replaced = rule.replace(string, lang="en")
+    assert replaced == output_replaced
+
+@pytest.mark.parametrize(
+    "string, replaced",
+    [
+        ('/ ได้สิ', 'ได้สิ'),
+        ('. / ซู-จุง', 'ซู-จุง'),
+        ('ขอให้มีความสุข/บาย/แล้วเจอกัน', 'ขอให้มีความสุข บาย แล้วเจอกัน'),
+        ('แล้วผลักเธอ/เข้าไปในรถ แต่ว่าคุณ/N ทำอย่างนั้นคนเดียวได้เหรอ', 'แล้วผลักเธอ เข้าไปในรถ แต่ว่าคุณ ทำอย่างนั้นคนเดียวได้เหรอ'),
+        ('และ ที่จริงมันคืออะไร / อุบายของเธอ ออกัสตุสเหรอ?', 'และ ที่จริงมันคืออะไร อุบายของเธอ ออกัสตุสเหรอ?'),
+    ]
+)
+def test_ReplaceSlashInSentence_replace(string, replaced):
+    rule = ReplaceSlashInSentence()
     output_replaced = rule.replace(string, lang="th")
     assert replaced == output_replaced
 
