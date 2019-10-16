@@ -1,6 +1,9 @@
 #data
 data/
 
+#logs
+notebooks/logs/*
+
 #sunword-nmt
 subword-nmt/
 
