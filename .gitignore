@@ -2,7 +2,7 @@
 data/
 
 #.vscode
-.vscode/*
+.vscode/
 
 #logs
 notebooks/logs/*
