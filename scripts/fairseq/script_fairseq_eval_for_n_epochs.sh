@@ -15,7 +15,6 @@ do
 
   fairseq-generate $data_path \
 	--path ${checkpoint_prefix}/checkpoint${i}.pt \
-	--quiet \
 	--beam $beam \
 	--max-tokens $max_tokens $opts > ${checkpoint_prefix}/result_checkpoint_${i}.txt
 
