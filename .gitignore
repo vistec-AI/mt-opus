@@ -2,10 +2,10 @@
 notebooks/tensorboard_log
 
 #data
-data/
+data
 
 #.vscode
-.vscode/
+.vscode
 
 #logs
 notebooks/logs/*
