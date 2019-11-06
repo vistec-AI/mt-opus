@@ -34,7 +34,7 @@ def evaluate(model_path,
              src_dict_path,
              tgt_dict_path,
              src_tok_type,
-             tgt_tok_type
+             tgt_tok_type,
              beam_size,
              remove_bpe):
 
