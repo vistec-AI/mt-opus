@@ -2,6 +2,9 @@ import os
 import re
 from pathlib import Path
 from typing import List, Tuple, Callable, Dict
+from torch.utils.data import Dataset
+
+from . import LanguageDataset
 
 def load_texts(path:str):
     try:
@@ -10,9 +13,12 @@ def load_texts(path:str):
     except Exception as e:
         raise "Can't open the file"
 
-class WangDataset(object):
 
-    def __init__(self, sentence_pairs: List[Dict[str, str]]):
+
+
+class WangDataset():
+
+    def __init__(self, sentence_pairs: Dict[str, List[str]]): 
         pass
         self.sentence_pairs = sentence_pairs
 
@@ -30,17 +36,29 @@ class WangDataset(object):
         """
         lines = load_texts(path_to_text_file)
 
-        sentence_pairs = []
+        sentence_pairs = {
+            "th": [],
+            "en": []
+        }
         print("Number of lines in the text file: {}".format(len(lines)))
         for line in lines:
             search_obj = re.search(r"answer:\s\[[\'\"](.+)[\'\"]\]\svariable:\s(.+)", line)
             if search_obj == None:
                 print("Can't parse the given text -- `{}`".format(line))
                 continue
-            lang_pair_dict = {
-                "th": search_obj.group(1),
-                "en": search_obj.group(2)
-            }
-            sentence_pairs.append(lang_pair_dict)
+            else:
+                if search_obj.group(1) != None:
+                    th = search_obj.group(1) 
+                    sentence_pairs["th"].append(th)
+                if search_obj.group(2) != None:
+                    en = search_obj.group(2)
+                    sentence_pairs["en"].append(en)
            
         return cls(sentence_pairs)
+
+    def get_language_pair_datasets(self, src_lang:str, tgt_lang:str):
+
+        src_dataset = LanguageDataset(self.sentence_pairs[src_lang]),
+        tgt_dataset = LanguageDataset(self.sentence_pairs[tgt_lang])
+
+        return src_dataset, tgt_dataset
