@@ -8,12 +8,24 @@ Translate pre-processed data with a trained model.
 """
 import argparse
 from functools import partial
+from typing import List, Dict
 
 import torch
+from torch.utils.data import Dataset, DataLoader
+
 import fairseq
+
+from fairseq.models.transformer import (
+    DEFAULT_MAX_SOURCE_POSITIONS,
+    DEFAULT_MAX_TARGET_POSITIONS
+) 
+
+from fairseq.tasks import FairseqTask, load_langpair_dataset
 from fairseq import checkpoint_utils, data, options, tasks, bleu, options, progress_bar, utils
 from fairseq.sequence_generator import SequenceGenerator
 from fairseq.meters import StopwatchMeter, TimeMeter
+
+from fairseq.data import FairseqDataset, LanguagePairDataset
 import sentencepiece as spm
 
 from pythainlp.tokenize import word_tokenize
@@ -41,7 +53,7 @@ def evaluate(model_path,
              tgt_tok_type,
              beam_size,
              remove_bpe,
-             examples,
+             dataset,
              use_cuda,
              use_tokenizer,
              n_examples,
@@ -62,6 +74,12 @@ def evaluate(model_path,
 
     tgt_dict_newmm = data.Dictionary()
     tgt_dict_newmm.add_from_file(tgt_dict_path_newmm)
+
+
+
+
+
+
 
     # Target always `newmm`
     scorer = bleu.Scorer(tgt_dict_newmm.pad(), tgt_dict_newmm.eos(), tgt_dict_newmm.unk())
@@ -86,6 +104,9 @@ def evaluate(model_path,
 
         
     list_translation_results = []
+
+    #TODO: Change from 1 example to mini-batch of size N
+
     for i, src_text in tqdm_notebook(enumerate(examples[src_lang][:n_examples]), total=n_examples):
 
         tgt_text = examples[tgt_lang][i]
@@ -190,6 +211,8 @@ if __name__ == '__main__':
     
     parser.add_argument("--dataset_name", type=str, default="wang", help="Name of test dataset (e.g `wang`)")
     parser.add_argument("--examples_path", type=str, help="Path to the file storing dataset withno language id suffix (e.g `data/wang/wang.sent`)")
+    parser.add_argument("--n_examples", type=int, default=None)
+
     parser.add_argument("--model_path", type=str)
     parser.add_argument("--beam_size", type=int, default=5)
     parser.add_argument("--src_lang", type=str)
@@ -205,26 +228,58 @@ if __name__ == '__main__':
     parser.add_argument("--src_tok_type", type=str, help="Either newmm, sentencepiece_opensubtitles")
 
     args = parser.parse_args()
+    examples = {"th": [], "en": []}
+
+
 
     if args.dataset_name == "wang":
-        examples = []
-        pass
 
-    else:
-        raise "Argument dataset_name is invalid (please only specify a name in this list: {})".format(DATASET_NAMES)
-    scorer, list_translation_results = evaluate(
-             examples=examples,
-             use_cuda=args.use_cuda,
-             model_path=args.model_path,
-             src_dict_path=args.src_dict_path,
-             tgt_dict_path=args.tgt_dict_path,
-             tgt_dict_path_newmm=args.tgt_dict_path_newmm,
-             src_lang=args.src_lang,
-             tgt_lang=args.tgt_lang,
-
-             beam_size=args.beam_size,
-             remove_bpe=args.remove_bpe,
-             src_tok_type=args.src_tok_type,
-             tgt_tok_type=args.tgt_tok_type)
+        dataset = WangDataset.from_text(path_to_text_file=args.examples_path)
+       
+        src_dataset, tgt_dataset = dataset.get_language_pair_datasets(args.src_lang, args.tgt_lang)
 
     
+        src_dict = data.Dictionary()
+        src_dict.add_from_file(args.src_dict_path)
+
+        tgt_dict = data.Dictionary()
+        tgt_dict.add_from_file(args.tgt_dict_path)
+
+        tgt_dict_newmm = data.Dictionary()
+        tgt_dict_newmm.add_from_file(args.tgt_dict_path_newmm)
+
+
+        lang_pair_dataset = LanguagePairDataset(
+                                src_dataset,
+                                tgt_dataset,
+                                left_pad_source=False,
+                                left_pad_target=False,
+                                max_source_positions=DEFAULT_MAX_SOURCE_POSITIONS,
+                                max_target_positions=DEFAULT_MAX_TARGET_POSITIONS,)
+        
+        print("Done")
+        exit()
+    else:
+        print("Argument dataset_name is invalid (please only specify a name in this list: {})".format(DATASET_NAMES))
+        exit()
+
+    # model_name = Path(model_path).stem
+    print(args)
+    print('\nStart evaluation.')
+    scorer, list_translation_results = evaluate(
+                                        dataset=lang_pair_dataset,
+                                        n_examples=None,
+                                        use_cuda=args.use_cuda,
+                                        model_path=args.model_path,
+                                        src_dict=src_dict,
+                                        tgt_dict=tgt_dict,
+                                        tgt_dict_newmm=tgt_dict_newmm,
+                                        src_lang=args.src_lang,
+                                        tgt_lang=args.tgt_lang,
+                                        use_tokenizer=args.use_tokenizer,
+                                        beam_size=args.beam_size,
+                                        remove_bpe=args.remove_bpe,
+                                        src_tok_type=args.src_tok_type,
+                                        tgt_tok_type=args.tgt_tok_type)
+
+    print('\Done evaluation.')
