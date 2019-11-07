@@ -20,8 +20,9 @@ from fairseq.models.transformer import (
     DEFAULT_MAX_TARGET_POSITIONS
 ) 
 
-from fairseq.tasks import FairseqTask, load_langpair_dataset
 from fairseq import checkpoint_utils, data, options, tasks, bleu, options, progress_bar, utils
+from fairseq.tasks import FairseqTask
+from fairseq.tasks.translation import load_langpair_dataset
 from fairseq.sequence_generator import SequenceGenerator
 from fairseq.meters import StopwatchMeter, TimeMeter
 
@@ -38,7 +39,7 @@ from utils import str2bool
 _pythainlp_tokenize = partial(word_tokenize, engine="newmm", keep_whitespace=False)
 # intit spm
 bpe_model_opensubtitles = spm.SentencePieceProcessor()
-bpe_model_opensubtitles.Load('./spm.opensubtitles.v2.model')
+bpe_model_opensubtitles.Load('./data/sentencepiece_models/spm.opensubtitles.v2.model')
 
 
 N_BEST = 5
@@ -236,7 +237,7 @@ if __name__ == '__main__':
 
         dataset = WangDataset.from_text(path_to_text_file=args.examples_path)
        
-        src_dataset, tgt_dataset = dataset.get_language_pair_datasets(args.src_lang, args.tgt_lang)
+        src_dataset, src_lengths, tgt_dataset, tgt_lengths = dataset.get_language_pair_datasets(args.src_lang, args.tgt_lang)
 
     
         src_dict = data.Dictionary()
@@ -248,16 +249,25 @@ if __name__ == '__main__':
         tgt_dict_newmm = data.Dictionary()
         tgt_dict_newmm.add_from_file(args.tgt_dict_path_newmm)
 
+        print("Create LanguagePairDataset.")
 
+        print()
         lang_pair_dataset = LanguagePairDataset(
-                                src_dataset,
-                                tgt_dataset,
+                                src=src_dataset,
+                                src_sizes=src_lengths,
+                                tgt=tgt_dataset,
+                                src_dict=src_dict,
+                                tgt_dict=tgt_dict,
                                 left_pad_source=False,
                                 left_pad_target=False,
                                 max_source_positions=DEFAULT_MAX_SOURCE_POSITIONS,
                                 max_target_positions=DEFAULT_MAX_TARGET_POSITIONS,)
         
-        print("Done")
+        
+        print("Done.")
+        print(lang_pair_dataset[0])
+        print(lang_pair_dataset[0]["source"][0])
+
         exit()
     else:
         print("Argument dataset_name is invalid (please only specify a name in this list: {})".format(DATASET_NAMES))
