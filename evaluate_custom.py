@@ -248,7 +248,7 @@ def evaluate(epoch,
     # print('task', task)
 
     # 2. Optimize ensemble for generation
-    device = torch.device("gpu:" + parser_args.gpu if use_cuda else "cpu")
+    device = torch.device("gpu:" + str(parser_args.gpu) if use_cuda else "cpu")
 
     #set device
     torch.cuda.device(device)
