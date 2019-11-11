@@ -319,7 +319,7 @@ if __name__ == '__main__':
     parser.add_argument("--remove_bpe", type=str, default=None, help="If target token type is SentencePiece, specify this argument as `sentencepiece` if not specigy is as`None`")
     parser.add_argument("--use_tokenizer", type=str2bool, help="Either to use the tokenizer (newmm, sentencepiece) to pretokenize source, target sentences before feed to the NMT model")
     parser.add_argument("--use_cuda", type=str2bool, help="Either to use GPU or not", default=False)
-    parser.add_argument("--gou", type=int, help="GPU ID", default=0)
+    parser.add_argument("--gpu", type=int, help="GPU ID", default=0)
 
     parser.add_argument("--tgt_tok_type", type=str, help="Either newmm, or sentencepiece_opensubtitles")
     parser.add_argument("--src_tok_type", type=str, help="Either newmm, sentencepiece_opensubtitles")
