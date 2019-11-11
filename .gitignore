@@ -4,6 +4,9 @@ notebooks/tensorboard_log
 #data
 data
 
+#results
+results
+
 #.vscode
 .vscode
 
