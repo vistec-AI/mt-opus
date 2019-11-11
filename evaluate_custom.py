@@ -241,7 +241,7 @@ def evaluate(epoch,
 
     state = checkpoint_utils.load_checkpoint_to_cpu(model_path)
     args = vars(state['args'])
-    args['data'] = args['data']
+    args['data'] = os.path.join(parser_args.data_prefix, args['data'])
  
     models, args, task = checkpoint_utils.load_model_ensemble_and_task([model_path], arg_overrides=args, task=None)
     # print("args", args)
@@ -290,7 +290,7 @@ if __name__ == '__main__':
     parser.add_argument("--dataset_name", type=str, default="wang", help="Name of test dataset (e.g `wang`)")
     parser.add_argument("--examples_path", type=str, help="Path to the file storing dataset withno language id suffix (e.g `data/wang/wang.sent`)")
     parser.add_argument("--n_examples", type=int, default=None)
-    
+    parser.add_argument("--data_prefix", type=str, default="/storage-mt"
     parser.add_argument("--bpe_model_path", type=str, default="./data/sentencepiece_models/spm.opensubtitles.v2.model")
     parser.add_argument("--model_dir", type=str)
     parser.add_argument("--n_epochs", type=int, default=1)
