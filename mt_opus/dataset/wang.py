@@ -1,7 +1,7 @@
 import os
 import re
 from pathlib import Path
-from typing import List, Tuple, Callable, Dict
+from typing import List, Tuple, Callable, Dict, Optional
 from torch.utils.data import Dataset
 from tqdm import tqdm
 from . import LanguageDataset
@@ -12,10 +12,14 @@ from pythainlp.tokenize import word_tokenize
 _pythainlp_tokenize = partial(word_tokenize, engine="newmm", keep_whitespace=False)
 
 
-def load_texts(path:str):
+def load_texts(path:str, number_of_lines:int = None):
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            return f.readlines()
+        if number_of_lines == None:
+            with open(path, "r", encoding="utf-8") as f: 
+                return f.readlines()
+        else:
+            with open(path, "r", encoding="utf-8") as f: 
+                return [ next(f) for x in range(number_of_lines) ]
     except Exception as e:
         raise "Can't open the file"
 
@@ -30,7 +34,7 @@ class WangDataset():
         self.sentence_pairs_lengths = sentence_pairs_lengths
         self.tokenize = tokenize
     @classmethod
-    def from_text(cls, path_to_text_file: str, tokenize=_pythainlp_tokenize):
+    def from_text(cls, path_to_text_file: str, tokenize=_pythainlp_tokenize, number_of_lines:int = None):
         """
         Maps sentence pairs in the following format to a list of tuple of source and target sentence
         
@@ -42,7 +46,7 @@ class WangDataset():
 
         """
         
-        lines = load_texts(path_to_text_file)
+        lines = load_texts(path_to_text_file, number_of_lines)
 
         sentence_pairs = {
             "th": [],
@@ -64,20 +68,20 @@ class WangDataset():
                     th = search_obj.group(1) 
                     toks = tokenize(th)
                     sentence_pairs["th"].append(' '.join(toks))
-                    sentence_pairs["th"].append(len(toks))
+                    sentence_pairs_lengths["th"].append(len(toks))
                 if search_obj.group(2) != None:
                     en = search_obj.group(2)
                     toks = tokenize(en)
                     sentence_pairs["en"].append(' '.join(toks))
-                    sentence_pairs["en"].append(len(toks))
+                    sentence_pairs_lengths["en"].append(len(toks))
 
 
         return cls(sentence_pairs=sentence_pairs, sentence_pairs_lengths=sentence_pairs_lengths, tokenize=tokenize)
 
-    def get_language_pair_datasets(self, src_lang:str, tgt_lang:str):
+    def get_language_pair_datasets(self, src_lang:str, tgt_lang:str, src_dict, tgt_dict):
 
-        src_dataset = LanguageDataset(self.sentence_pairs[src_lang])
-        tgt_dataset = LanguageDataset(self.sentence_pairs[tgt_lang])
+        src_dataset = LanguageDataset(self.sentence_pairs[src_lang], src_dict)
+        tgt_dataset = LanguageDataset(self.sentence_pairs[tgt_lang], tgt_dict)
 
 
         
