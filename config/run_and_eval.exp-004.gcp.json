@@ -12,19 +12,19 @@
         "n_examples": 6146
     },
     "data": [
-        // {
-        //     "id": "exp-004_1_1",
-        //     "src_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.th.txt",
-        //     "tgt_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.en.txt",
-        //     "tgt_dict_path_newmm": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.en.txt",
-        //     "src_tok_type": "newmm",
-        //     "tgt_tok_type": "newmm",
-        //     "src_lang": "th",
-        //     "tgt_lang": "en",
-        //     "model_dir": "/storage-mt/models/opensubtitles_model/exp004-1.1/transformer_base",
-        //     "max_sentences": 600,
-        //     "result_dir": "./results/translation/exp004-1.1"
-        // },
+        {
+            "id": "exp-004_1_1",
+            "src_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.th.txt",
+            "tgt_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.en.txt",
+            "tgt_dict_path_newmm": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.en.txt",
+            "src_tok_type": "newmm",
+            "tgt_tok_type": "newmm",
+            "src_lang": "th",
+            "tgt_lang": "en",
+            "model_dir": "/storage-mt/models/opensubtitles_model/exp004-1.1/transformer_base",
+            "max_sentences": 300,
+            "result_dir": "./results/translation/exp004-1.1"
+        },
         {
             "id": "exp-004_2",
             "src_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/en-th/dict.en.txt",
@@ -35,7 +35,7 @@
             "src_lang": "en",
             "tgt_lang": "th",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-2/transformer_base",
-            "max_sentences": 600,
+            "max_sentences": 300,
             "result_dir": "./results/translation/exp004-2"
         },
         {
@@ -48,7 +48,7 @@
             "src_lang": "th",
             "tgt_lang": "en",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-3/transformer_base",
-            "max_sentences": 800,
+            "max_sentences": 300,
             "result_dir": "./results/translation/exp004-3"
         },
         {
@@ -61,7 +61,7 @@
             "src_lang": "en",
             "tgt_lang": "th",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-4/transformer_base",
-            "max_sentences": 800,
+            "max_sentences": 300,
             "result_dir": "./results/translation/exp004-4"
         }
     ]
