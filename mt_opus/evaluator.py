@@ -234,7 +234,6 @@ def _evaluate_per_epoch(epoch,
              use_cuda,
              use_tokenizer,
              parser_args,
-             device,
              n_best=N_BEST) :
 
     
