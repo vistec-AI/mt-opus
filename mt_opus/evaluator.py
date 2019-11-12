@@ -175,10 +175,7 @@ def _run_inference(parser_args, models, iterator, generator, scorer, use_cuda, t
                 for j, hypo in enumerate(hypos[i][:1]):
                     
                     # print("hypo['tokens']", hypo['tokens'])
-                    hypo_ids = hypo['tokens'].int().cpu()
-                    hypo_str = tgt_dict.string(hypo_ids, parser_args.remove_bpe)
-
-
+               
                     # hypo_tokens, hypo_str, _ = utils.post_process_prediction(
                     #         hypo_tokens=hypo['tokens'].int().cpu(),
                     #         src_str=src_str,
@@ -186,24 +183,25 @@ def _run_inference(parser_args, models, iterator, generator, scorer, use_cuda, t
                     #         align_dict=None,
                     #         tgt_dict=tgt_dict,
                     #         remove_bpe=parser_args.remove_bpe,
-                    # )
-    
+                    # 
                     # print(j, "hypo_str:", hypo_str)
-                    if parser_args.remove_bpe is not None:
-
-                        hypos_toks = _pythainlp_tokenize(hypo_str)
-                        hypo_str = " ".join(hypos_toks)
-                        # print("hypos_toks", hypos_toks)
-
-                        hypo_ids = [tgt_dict_newmm.index(t) for t in hypos_toks ]
-                        hypo_ids.append(tgt_dict_newmm.eos())
-
-                        hypo_toks_tensor = torch.IntTensor(hypo_ids)
-                    else: 
-                        hypo_toks_tensor = hypo_ids
-
                     # Score only the top hypothesis
                     if has_target and j == 0:
+                         hypo_ids = hypo['tokens'].int().cpu()
+                        hypo_str = tgt_dict.string(hypo_ids, parser_args.remove_bpe)
+
+                        if parser_args.remove_bpe is not None:
+                            hypos_toks = _pythainlp_tokenize(hypo_str)
+                            hypo_str = " ".join(hypos_toks)
+                            # print("hypos_toks", hypos_toks)
+
+                            hypo_ids = [tgt_dict_newmm.index(t) for t in hypos_toks ]
+                            hypo_ids.append(tgt_dict_newmm.eos())
+
+                            hypo_toks_tensor = torch.IntTensor(hypo_ids)
+                            
+                        else: 
+                            hypo_toks_tensor = hypo_ids
 
                         list_translation_results.append({
                             "source_str": src_str,
