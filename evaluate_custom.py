@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-path", metavar='path', type=str, help="Path to the run_and_eval file")
-    parser.add_argument("--use_cuda", action="store_true", default=False)
+    parser.add_argument("--enable_cuda", action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -100,4 +100,4 @@ if __name__ == "__main__":
 
         obj = json.load(f)
 
-        process_script(obj, use_cuda=args.use_cuda)
+        process_script(obj, use_cuda=args.enable_cuda)
