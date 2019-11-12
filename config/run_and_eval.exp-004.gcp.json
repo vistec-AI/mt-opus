@@ -34,7 +34,7 @@
             "src_lang": "en",
             "tgt_lang": "th",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-2/transformer_base",
-            "max_sentences": 1000,
+            "max_sentences": 600,
             "result_dir": "./results/translation/exp004-1.1"
         },
         {
