@@ -22,7 +22,7 @@
             "src_lang": "th",
             "tgt_lang": "en",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-1.1/transformer_base",
-            "max_sentences": 300,
+            "max_sentences": 600,
             "result_dir": "./results/translation/exp004-1.1"
         },
         {
@@ -34,7 +34,7 @@
             "src_lang": "en",
             "tgt_lang": "th",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-2/transformer_base",
-            "max_sentences": 300,
+            "max_sentences": 600,
             "result_dir": "./results/translation/exp004-2"
         },
         {
@@ -46,7 +46,7 @@
             "src_lang": "th",
             "tgt_lang": "en",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-3/transformer_base",
-            "max_sentences": 600,
+            "max_sentences": 800,
             "result_dir": "./results/translation/exp004-3"
         },
         {
@@ -58,7 +58,7 @@
             "src_lang": "en",
             "tgt_lang": "th",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-4/transformer_base",
-            "max_sentences": 600,
+            "max_sentences": 800,
             "result_dir": "./results/translation/exp004-4"
         }
     ]
