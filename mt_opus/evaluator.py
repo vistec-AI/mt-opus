@@ -252,7 +252,7 @@ def _evaluate_per_epoch(epoch,
   
     # set device if use cuda
     if parser_args.use_cuda:
-        with torch.cuda.device(args.gpu):
+        with torch.cuda.device(parser_args.gpu):
             for model in models:
                 model.make_generation_fast_(
                     beamable_mm_beam_size=None if parser_args.beam == None else parser_args.beam,
