@@ -35,7 +35,7 @@
             "tgt_lang": "th",
             "model_dir": "./models/opensubtitles_model/exp004-2/transformer_base",
             "max_sentences": 100,
-            "result_dir": "./results/translation/exp004-1.1"
+            "result_dir": "./results/translation/exp004-2"
         },
         {
             "id": "exp-004_3",
@@ -47,7 +47,7 @@
             "tgt_lang": "en",
             "model_dir": "./models/opensubtitles_model/exp004-3/transformer_base",
             "max_sentences": 100,
-            "result_dir": "./results/translation/exp004-1.1"
+            "result_dir": "./results/translation/exp004-3"
         },
         {
             "id": "exp-004_4",
@@ -59,7 +59,7 @@
             "tgt_lang": "th",
             "model_dir": "./models/opensubtitles_model/exp004-4/transformer_base",
             "max_sentences": 100,
-            "result_dir": "./results/translation/exp004-1.1"
+            "result_dir": "./results/translation/exp004-4"
         }
     ]
 }
