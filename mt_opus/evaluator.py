@@ -187,7 +187,7 @@ def _run_inference(parser_args, models, iterator, generator, scorer, use_cuda, t
                     # print(j, "hypo_str:", hypo_str)
                     # Score only the top hypothesis
                     if has_target and j == 0:
-                         hypo_ids = hypo['tokens'].int().cpu()
+                        hypo_ids = hypo['tokens'].int().cpu()
                         hypo_str = tgt_dict.string(hypo_ids, parser_args.remove_bpe)
 
                         if parser_args.remove_bpe is not None:
