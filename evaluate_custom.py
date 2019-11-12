@@ -62,28 +62,29 @@ def process_script(obj, use_cuda=False):
         # print("\n")
         
         ns = Namespace(**args)
+        evaluate(ns)
 
-        if use_cuda == True:
-            while len(AVAILABLE_GPUS) < 1:
-                pass
+        # if use_cuda == True:
+        #     while len(AVAILABLE_GPUS) < 1:
+        #         pass
             
-            gpu_id = AVAILABLE_GPUS.pop()
-            ns.gpu = gpu_id
+        #     gpu_id = AVAILABLE_GPUS.pop()
+        #     ns.gpu = gpu_id
             
-            print("\n-- Evaluate with GPU ID: {}".format(gpu_id))
-            # print("args:", ns)
-            t = threading.Thread(target=eval_on_gpu, args=(ns,))
-            t.start()
-        else: # cpu
-            evaluate(ns)
+        #     print("\n-- Evaluate with GPU ID: {}".format(gpu_id))
+        #     # print("args:", ns)
+        #     t = threading.Thread(target=eval_on_gpu, args=(ns,))
+        #     t.start()
+        # else: # cpu
+        #     evaluate(ns)
 
-def eval_on_gpu(ns):
+# def eval_on_gpu(ns):
 
-    SEMAPHORE.acquire()
-    gpu_id = evaluate(ns)
-    SEMAPHORE.release()
-    print("Relase GPU ID: {}".format(gpu_id))
-    AVAILABLE_GPUS.append(gpu_id)
+#     SEMAPHORE.acquire()
+#     gpu_id = evaluate(ns)
+#     SEMAPHORE.release()
+#     print("Relase GPU ID: {}".format(gpu_id))
+#     AVAILABLE_GPUS.append(gpu_id)
 
 if __name__ == "__main__":
 

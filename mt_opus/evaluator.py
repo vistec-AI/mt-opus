@@ -127,6 +127,8 @@ def build_generator(tgt_dict, args):
                 )
 
     return generator
+    return _apply(sample)
+
 
 def _run_inference(parser_args, models, iterator, generator, scorer, use_cuda, tgt_dict, tgt_dict_newmm, src_dict):
     
@@ -254,59 +256,26 @@ def _evaluate_per_epoch(epoch,
         num_shards = torch.cuda.device_count()
 
     # set device if use cuda
-    if parser_args.use_cuda:
-        with torch.cuda.device(parser_args.gpu):
-            for model in models:
-                model.make_generation_fast_(
-                    beamable_mm_beam_size=None if parser_args.beam == None else parser_args.beam,
-                    need_attn=False,
-                )
-                if use_cuda:
-                    model.cuda()
-
-            # print(models)
-            # 3. Acquite Batch iterator
-            print("INFO: Acquire Batch iterator")
-            _iterator = get_batch_iterator(dataset,
-                                           parser_args,
-                                           epoch=epoch,
-                                           seed=1,
-                                           max_positions=None,
-                                           num_workers=4,
-                                           num_shards=num_shards,
-                                           shard_id=parser_args.gpu)
-            # print("epoch_iter", iterator)
-            # print('length of vocab size,', len(tgt_dict))
-
-            # print('tgt vocab last 10 sumbols', tgt_dict[-1])
-            _generator = build_generator(tgt_dict=tgt_dict, args=parser_args)
-
-
-            # 5. Initiate scorer
-            # scorer = bleu.Scorer(tgt_dict.pad(), tgt_dict.eos(), tgt_dict.unk())
-            _scorer = bleu.Scorer(tgt_dict_newmm.pad(), tgt_dict_newmm.eos(), tgt_dict_newmm.unk())
-
-
-            scorer, list_translation_results = _run_inference(parser_args=parser_args,
-                                                        models=models,
-                                                        iterator=_iterator,
-                                                        generator=_generator,
-                                                        scorer=_scorer,
-                                                        use_cuda=use_cuda,
-                                                        tgt_dict=tgt_dict,
-                                                        tgt_dict_newmm=tgt_dict_newmm,
-                                                        src_dict=src_dict)
-    else:
+    
         for model in models:
             model.make_generation_fast_(
                 beamable_mm_beam_size=None if parser_args.beam == None else parser_args.beam,
                 need_attn=False,
             )
+            if use_cuda:
+                model.cuda()
 
         # print(models)
         # 3. Acquite Batch iterator
         print("INFO: Acquire Batch iterator")
-        _iterator = get_batch_iterator(dataset, parser_args, epoch=epoch, seed=1, max_positions=None)
+        _iterator = get_batch_iterator(dataset,
+                                        parser_args,
+                                        epoch=epoch,
+                                        seed=1,
+                                        max_positions=None,
+                                        num_workers=4,
+                                        num_shards=num_shards,
+                                        shard_id=parser_args.gpu)
         # print("epoch_iter", iterator)
         # print('length of vocab size,', len(tgt_dict))
 
@@ -328,8 +297,7 @@ def _evaluate_per_epoch(epoch,
                                                     tgt_dict=tgt_dict,
                                                     tgt_dict_newmm=tgt_dict_newmm,
                                                     src_dict=src_dict)
-    return scorer, list_translation_results
-
+   
 
 def evaluate(args):
     
