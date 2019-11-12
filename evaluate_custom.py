@@ -59,7 +59,6 @@ def process_script(obj, use_cuda=False):
             if k in args:
                 args[k] = v
         
-        print("\nArgs: After add specific experiment setting:", args)
         # print("\n")
         
         ns = Namespace(**args)
@@ -69,18 +68,19 @@ def process_script(obj, use_cuda=False):
                 pass
             
             gpu_id = AVAILABLE_GPUS.pop()
-
+            ns.gpu = gpu_id
+            
             print("\n-- Evaluate with GPU ID: {}".format(gpu_id))
-            t = threading.Thread(target=eval_on_gpu, args=(ns, gpu_id,))
+            # print("args:", ns)
+            t = threading.Thread(target=eval_on_gpu, args=(ns,))
             t.start()
-
         else: # cpu
             evaluate(ns)
 
-def eval_on_gpu(ns, gpu_id):
+def eval_on_gpu(ns):
 
     SEMAPHORE.acquire()
-    gpu_id = evaluate(ns, gpu=gpu_id)
+    gpu_id = evaluate(ns)
     SEMAPHORE.release()
     print("Relase GPU ID: {}".format(gpu_id))
     AVAILABLE_GPUS.append(gpu_id)
