@@ -89,7 +89,7 @@ def get_batch_iterator(
         batch_sampler=batch_sampler,
         seed=1,
         num_shards=1,
-        shard_id=0,
+        shard_id=shard_id,
         num_workers=num_workers,
         epoch=epoch,
     ).next_epoch_itr(shuffle=False)
