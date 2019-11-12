@@ -48,7 +48,6 @@ def process_script(obj, use_cuda=False):
         args[k] = v
         print(" (shared) set ", k, "=", v)
     
-    args["use_cuda"] = use_cuda
     # print("\nAfter add shared args:", args)
 
     number_of_items = len(obj["data"])
@@ -60,7 +59,7 @@ def process_script(obj, use_cuda=False):
             if k in args:
                 args[k] = v
         
-        # print("\nAfter add specific experiment args:", args)
+        print("\nArgs: After add specific experiment setting:", args)
         # print("\n")
         
         ns = Namespace(**args)
