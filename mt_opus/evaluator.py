@@ -59,6 +59,7 @@ def get_batch_iterator(
     epoch: int = 0,
     seed: int = 1,
     max_positions = None,
+    num_workers: int = 4,
 ):
 
     assert isinstance(dataset, FairseqDataset)
@@ -88,7 +89,7 @@ def get_batch_iterator(
         seed=1,
         num_shards=1,
         shard_id=0,
-        num_workers=1,
+        num_workers=num_workers,
         epoch=epoch,
     ).next_epoch_itr(shuffle=False)
 
@@ -264,7 +265,7 @@ def _evaluate_per_epoch(epoch,
             # print(models)
             # 3. Acquite Batch iterator
             print("INFO: Acquire Batch iterator")
-            _iterator = get_batch_iterator(dataset, parser_args, epoch=epoch, seed=1, max_positions=None)
+            _iterator = get_batch_iterator(dataset, parser_args, epoch=epoch, seed=1, max_positions=None, num_workers=4)
             # print("epoch_iter", iterator)
             # print('length of vocab size,', len(tgt_dict))
 
