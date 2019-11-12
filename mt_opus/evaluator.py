@@ -88,7 +88,7 @@ def get_batch_iterator(
         collate_fn=dataset.collater,
         batch_sampler=batch_sampler,
         seed=1,
-        num_shards=num_workers1,
+        num_shards=num_workers,
         shard_id=shard_id,
         num_workers=num_workers,
         epoch=epoch,
