@@ -1,0 +1,65 @@
+
+{
+    "shared_config":{
+        "beam": 5,
+        "n_epochs": 25,
+        "log_format": "tqdm",
+        "bpe_model_path": "/storage-mt/data/sentencepiece_models/spm.opensubtitles.v2.model",
+        "tgt_dict_path_newmm": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.en.txt",
+        "dataset_name": "wang",
+        "data_prefix": "/storage-mt",
+        "examples_path": "/storage-mt/data/wang/2019-06-26_output_Non_Empty_Answer.txt",
+        "use_cuda": true,
+        "n_examples": 6146
+    },
+    "data": [
+        {
+            "id": "exp-004_1_1",
+            "src_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.th.txt",
+            "tgt_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.en.txt",
+            "src_tok_type": "newmm",
+            "tgt_tok_type": "newmm",
+            "src_lang": "th",
+            "tgt_lang": "en",
+            "model_dir": "/storage-mt/models/opensubtitles_model/exp004-1.1/transformer_base",
+            "max_sentences": 600,
+            "result_dir": "./results/translation/exp004-1.1"
+        },
+        {
+            "id": "exp-004_2",
+            "src_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/en-th/dict.en.txt",
+            "tgt_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/en-th/dict.th.txt",
+            "src_tok_type": "newmm",
+            "tgt_tok_type": "newmm",
+            "src_lang": "en",
+            "tgt_lang": "th",
+            "model_dir": "/storage-mt/models/opensubtitles_model/exp004-2/transformer_base",
+            "max_sentences": 1000,
+            "result_dir": "./results/translation/exp004-1.1"
+        },
+        {
+            "id": "exp-004_3",
+            "src_dict_path": "/storage-mt/data/opensubtitles_bin/sentencepiece_opensubtitles-sentencepiece_opensubtitles/th-en/dict.th.txt",
+            "tgt_dict_path": "/storage-mt/data/opensubtitles_bin/sentencepiece_opensubtitles-sentencepiece_opensubtitles/th-en/dict.en.txt",
+            "src_tok_type": "sentencepiece_opensubtitles",
+            "tgt_tok_type": "sentencepiece_opensubtitles",
+            "src_lang": "th",
+            "tgt_lang": "en",
+            "model_dir": "/storage-mt/models/opensubtitles_model/exp004-3/transformer_base",
+            "max_sentences": 1000,
+            "result_dir": "./results/translation/exp004-1.1"
+        },
+        {
+            "id": "exp-004_4",
+            "src_dict_path": "/storage-mt/data/opensubtitles_bin/sentencepiece_opensubtitles-sentencepiece_opensubtitles/en-th/dict.en.txt",
+            "tgt_dict_path": "/storage-mt/data/opensubtitles_bin/sentencepiece_opensubtitles-sentencepiece_opensubtitles/en-th/dict.th.txt",
+            "src_tok_type": "sentencepiece_opensubtitles",
+            "tgt_tok_type": "sentencepiece_opensubtitles",
+            "src_lang": "en",
+            "tgt_lang": "th",
+            "model_dir": "/storage-mt/models/opensubtitles_model/exp004-4/transformer_base",
+            "max_sentences": 1000,
+            "result_dir": "./results/translation/exp004-1.1"
+        }
+    ]
+}
