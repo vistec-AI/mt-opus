@@ -1,4 +1,3 @@
-
 {
     "shared_config":{
         "beam": 5,
@@ -29,7 +28,7 @@
             "id": "exp-004_2",
             "src_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/en-th/dict.en.txt",
             "tgt_dict_path": "/storage-mt/data/opensubtitles_bin/newmm-newmm/en-th/dict.th.txt",
-            "tgt_dict_path_newmm": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.th.txt",
+            "tgt_dict_path_newmm": "/storage-mt/data/opensubtitles_bin/newmm-newmm/en-th/dict.th.txt",
             "src_tok_type": "newmm",
             "tgt_tok_type": "newmm",
             "src_lang": "en",
@@ -49,20 +48,22 @@
             "tgt_lang": "en",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-3/transformer_base",
             "max_sentences": 300,
-            "result_dir": "./results/translation/exp004-3"
+            "result_dir": "./results/translation/exp004-3",
+            "remove_bpe": "sentencepiece"
         },
         {
             "id": "exp-004_4",
             "src_dict_path": "/storage-mt/data/opensubtitles_bin/sentencepiece_opensubtitles-sentencepiece_opensubtitles/en-th/dict.en.txt",
             "tgt_dict_path": "/storage-mt/data/opensubtitles_bin/sentencepiece_opensubtitles-sentencepiece_opensubtitles/en-th/dict.th.txt",
-            "tgt_dict_path_newmm": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.th.txt",
+            "tgt_dict_path_newmm": "/storage-mt/data/opensubtitles_bin/newmm-newmm/en-th/dict.th.txt",
             "src_tok_type": "sentencepiece_opensubtitles",
             "tgt_tok_type": "sentencepiece_opensubtitles",
             "src_lang": "en",
             "tgt_lang": "th",
             "model_dir": "/storage-mt/models/opensubtitles_model/exp004-4/transformer_base",
             "max_sentences": 300,
-            "result_dir": "./results/translation/exp004-4"
+            "result_dir": "./results/translation/exp004-4",
+            "remove_bpe": "sentencepiece"
         }
     ]
 }
