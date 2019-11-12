@@ -299,9 +299,9 @@ def evaluate(args):
     bpe_model_opensubtitles.Load(args.bpe_model_path)
     _sentencepiece_tokenize = partial(bpe_model_opensubtitles.EncodeAsPieces)
 
-    device = torch.device(str(parser_args.gpu) if use_cuda else "cpu")
+    device = torch.device(str(args.gpu) if args.use_cuda else "cpu")
 
-    print("Selected device (use_cuda={}): {}".format(use_cuda, device))
+    print("Selected device (use_cuda={}): {}".format(args.use_cuda, device))
 
     if args.dataset_name == "wang":
 
