@@ -3,7 +3,7 @@
     "shared_config":{
         "beam": 5,
         "n_epochs": 25,
-        "log_format": "simple",
+        "log_format": "tqdm",
         "bpe_model_path": "/storage-mt/data/sentencepiece_models/spm.opensubtitles.v2.model",
         "tgt_dict_path_newmm": "/storage-mt/data/opensubtitles_bin/newmm-newmm/th-en/dict.en.txt",
         "dataset_name": "wang",
