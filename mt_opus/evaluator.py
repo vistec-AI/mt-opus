@@ -298,7 +298,7 @@ def _evaluate_per_epoch(epoch,
                                                     tgt_dict_newmm=tgt_dict_newmm,
                                                     src_dict=src_dict)
    
-
+        return scorer, list_translation_results 
 def evaluate(args):
     
     # intit tokenizer
