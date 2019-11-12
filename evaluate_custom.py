@@ -38,17 +38,17 @@ def process_script(obj, use_cuda=False):
     shared_config = obj["shared_config"]
 
     run_and_eval_parser = init_run_and_eval_parser()
-    args = run_and_eval_parser.parse_known_args()
+    _args = run_and_eval_parser.parse_known_args()
     
 
-    args = vars(args[0])
+    args = vars(_args[0])
 
     # print("Before:", args,'\n')
     for k, v in shared_config.items():
         args[k] = v
         print(" (shared) set ", k, "=", v)
     
-    # print("\nAfter add shared args:", args)
+    print("\nAfter add shared args:", args)
 
     number_of_items = len(obj["data"])
    
