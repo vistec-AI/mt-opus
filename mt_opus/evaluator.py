@@ -61,6 +61,7 @@ def get_batch_iterator(
     max_positions = None,
     num_workers: int = 4,
     shard_id: int = 0,
+    num_shards: int = 2,
 ):
 
     assert isinstance(dataset, FairseqDataset)
@@ -88,7 +89,7 @@ def get_batch_iterator(
         collate_fn=dataset.collater,
         batch_sampler=batch_sampler,
         seed=1,
-        num_shards=1,
+        num_shards=num_shards,
         shard_id=shard_id,
         num_workers=num_workers,
         epoch=epoch,
@@ -249,7 +250,9 @@ def _evaluate_per_epoch(epoch,
     # print('task', task)
 
     # 2. Optimize ensemble for generation
-  
+    if parser_args.use_cuda:
+        num_shards = torch.cuda.device_count()
+
     # set device if use cuda
     if parser_args.use_cuda:
         with torch.cuda.device(parser_args.gpu):
@@ -270,6 +273,7 @@ def _evaluate_per_epoch(epoch,
                                            seed=1,
                                            max_positions=None,
                                            num_workers=4,
+                                           num_shards=num_shards,
                                            shard_id=parser_args.gpu)
             # print("epoch_iter", iterator)
             # print('length of vocab size,', len(tgt_dict))
