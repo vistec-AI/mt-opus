@@ -14,7 +14,7 @@ We used 9 datasets from [OPUS](http://opus.nlpl.eu/index.php) to train and valid
 | [Tanzil v1](https://object.pouta.csc.fi/OPUS-Tanzil/v1/moses/en-th.txt.zip) | 93.5k | 2.8M | 3.4M | the Quran | [2] |
 | [KDE4 v2](https://object.pouta.csc.fi/OPUS-KDE4/v2/moses/en-th.txt.zip) | 92.0k | 0.5M | 0.2M | KDE4 documentation | [2] |
 | [Ubuntu v14.10](https://object.pouta.csc.fi/OPUS-Ubuntu/v14.10/moses/en-th.txt.zip) | 46.6k | 0.4M | 0.2M | Ubuntu documentation | [2] |
-| [Tatoeba v20190709](https://object.pouta.csc.fi/OPUS-Tatoeba/v20190709/moses/en-th.txt.zip) | 1.1k | 11.0M | 1.7k | crowdsourced translations | [2] |
+| [Tatoeba v20190709](https://object.pouta.csc.fi/OPUS-Tatoeba/v20190709/moses/en-th.txt.zip) | 1.1k | 6k | 1.7k | crowdsourced translations | [2] |
 
 ## Models
 
